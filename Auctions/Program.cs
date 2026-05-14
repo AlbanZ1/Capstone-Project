@@ -2,10 +2,6 @@
 using Auctions.Data.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Azure.Identity;
-using Microsoft.Extensions.Configuration;
-using Auctions.Models;
-using Microsoft.Extensions.Configuration.AzureKeyVault;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,16 +19,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Read connection strings from appsettings.json
 var sqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var storageConnectionString = builder.Configuration["AzureStorage:ConnectionString"];
 
 if (string.IsNullOrEmpty(sqlConnectionString))
 {
     throw new InvalidOperationException("Connection string 'SQLConnectionString' not found in appsettings.json.");
-}
-
-if (string.IsNullOrEmpty(storageConnectionString))
-{
-    throw new InvalidOperationException("Connection string 'AzureStorage:ConnectionString' not found in appsettings.json.");
 }
 
 // Add services to the container.
@@ -48,11 +38,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IListingsService, ListingsService>();
 builder.Services.AddScoped<IBidsService, BidsService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
-
-builder.Services.Configure<StorageConfig>(options =>
-{
-    options.ConnectionString = storageConnectionString;
-});
+builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
 
 var app = builder.Build();
 

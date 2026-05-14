@@ -9,10 +9,6 @@ using Auctions.Data;
 using Auctions.Models;
 using Auctions.Data.Services;
 using System.Security.Claims;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace Auctions.Controllers
 {
@@ -21,16 +17,14 @@ namespace Auctions.Controllers
         private readonly IListingsService _listingsService;
         private readonly IBidsService _bidsService;
         private readonly ICommentsService _commentsService;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IConfiguration _configuration;
+        private readonly IImageStorageService _imageStorageService;
 
-        public ListingsController(IListingsService listingsService, IWebHostEnvironment webHostEnvironment, IBidsService bidsService, ICommentsService commentsService, IConfiguration configuration)
+        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService)
         {
             _listingsService = listingsService;
-            _webHostEnvironment = webHostEnvironment;
             _bidsService = bidsService;
             _commentsService = commentsService;
-            _configuration = configuration;
+            _imageStorageService = imageStorageService;
         }
 
         // GET: Listings
@@ -96,38 +90,15 @@ namespace Auctions.Controllers
         {
             if (listing.Image != null)
             {
-                // Generate a unique file name for the uploaded image
-                string fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(listing.Image.FileName);
+                var imagePath = await _imageStorageService.UploadListingImageAsync(listing.Image);
 
-                // Get the Azure Storage Connection String from appsettings.json and check if is missing
-                var storageConfig = _configuration["AzureStorage:ConnectionString"];
-                if (string.IsNullOrEmpty(storageConfig))
-                {
-                    throw new InvalidOperationException("Azure Storage connection string is missing.");
-                }
-
-                string containerName = "images";
-                var blobServiceClient = new BlobServiceClient(storageConfig);
-                var blobContainerClient = blobServiceClient.GetBlobContainerClient(containerName);
-
-                // Ensure the container exists (you may remove this if the container is pre-created)
-                await blobContainerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
-
-                // Upload the file to Azure Blob Storage
-                var blobClient = blobContainerClient.GetBlobClient(fileName);
-                using (var stream = listing.Image.OpenReadStream())
-                {
-                    await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = listing.Image.ContentType });
-                }
-
-                // Save relative path in the database
                 var listObj = new Listing
                 {
                     Title = listing.Title,
                     Description = listing.Description,
                     Price = listing.Price,
                     IdentityUserId = listing.IdentityUserId,
-                    ImagePath = blobClient.Uri.ToString(),
+                    ImagePath = imagePath,
                 };
 
                 await _listingsService.Add(listObj);
