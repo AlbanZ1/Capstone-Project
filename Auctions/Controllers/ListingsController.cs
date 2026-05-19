@@ -32,6 +32,8 @@ namespace Auctions.Controllers
         // GET: Listings
         public async Task<IActionResult> Index(int? pageNumber, string searchString, int? categoryId)
         {
+            await RefreshAuctionStatusesAsync();
+
             var applicationDbContext = _listingsService.GetAll();
             int pageSize = 3;
 
@@ -49,11 +51,13 @@ namespace Auctions.Controllers
                 applicationDbContext = applicationDbContext.Where(l => l.CategoryId == categoryId.Value);
             }
 
-            return View(await PaginatedList<Listing>.CreateAsync(applicationDbContext.Where(l => l.IsSold == false).AsNoTracking(), pageNumber ?? 1, pageSize));
+            return View(await PaginatedList<Listing>.CreateAsync(applicationDbContext.Where(l => l.Status != AuctionStatus.Closed).AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         public async Task<IActionResult> MyListings(int? pageNumber)
         {
+            await RefreshAuctionStatusesAsync();
+
             var applicationDbContext = _listingsService.GetAll();
             int pageSize = 3;
 
@@ -85,6 +89,8 @@ namespace Auctions.Controllers
                 return NotFound();
             }
 
+            await RefreshAuctionStatusAsync(listing);
+
             return View(listing);
         }
 
@@ -92,7 +98,11 @@ namespace Auctions.Controllers
         public async Task<IActionResult> Create()
         {
             await PopulateCategorySelectList();
-            return View();
+            return View(new ListingVM
+            {
+                StartTime = DateTime.Now,
+                EndTime = DateTime.Now.AddDays(7)
+            });
         }
 
         // POST: Listings/Create
@@ -104,13 +114,27 @@ namespace Auctions.Controllers
         {
             if (ModelState.IsValid && listing.Image != null)
             {
+                if (listing.EndTime <= listing.StartTime)
+                {
+                    ModelState.AddModelError(nameof(listing.EndTime), "End time must be after start time.");
+                    await PopulateCategorySelectList(listing.CategoryId);
+                    return View(listing);
+                }
+
                 var imagePath = await _imageStorageService.UploadListingImageAsync(listing.Image);
+                var startingPrice = listing.StartingPrice;
+                var status = listing.StartTime <= DateTime.Now ? AuctionStatus.Active : AuctionStatus.Pending;
 
                 var listObj = new Listing
                 {
                     Title = listing.Title,
                     Description = listing.Description,
-                    Price = listing.Price,
+                    Price = startingPrice,
+                    StartingPrice = startingPrice,
+                    CurrentPrice = startingPrice,
+                    StartTime = listing.StartTime,
+                    EndTime = listing.EndTime,
+                    Status = status,
                     IdentityUserId = listing.IdentityUserId,
                     ImagePath = imagePath,
                     CategoryId = listing.CategoryId,
@@ -136,20 +160,37 @@ namespace Auctions.Controllers
         [HttpPost]
         public async Task<ActionResult> AddBid([Bind("Id, Price, ListingId, IdentityUserId")] Bid bid)
         {
-            if(ModelState.IsValid)
+            var listing = await _listingsService.GetById(bid.ListingId);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
+            await RefreshAuctionStatusAsync(listing);
+
+            if (listing.Status == AuctionStatus.Active && ModelState.IsValid && bid.Price > listing.CurrentPrice)
             {
                 await _bidsService.Add(bid);
+                listing.Price = bid.Price;
+                listing.CurrentPrice = bid.Price;
+                await _listingsService.SaveChanges();
             }
-            var listing = await _listingsService.GetById(bid.ListingId);
-            listing.Price = bid.Price;
-            await _listingsService.SaveChanges();
 
             return View("Details", listing);
         }
         public async Task<ActionResult> CloseBidding(int id)
         {
             var listing = await _listingsService.GetById(id);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
             listing.IsSold = true;
+            listing.Status = AuctionStatus.Closed;
+            listing.WinnerUserId = listing.Bids?
+                .OrderByDescending(b => b.Price)
+                .FirstOrDefault()?.IdentityUserId;
             await _listingsService.SaveChanges();
             return View("Details", listing);
         }
@@ -162,6 +203,64 @@ namespace Auctions.Controllers
             }
             var listing = await _listingsService.GetById(comment.ListingId);
             return View("Details", listing);
+        }
+
+        private async Task RefreshAuctionStatusesAsync()
+        {
+            var listings = await _context.Listings
+                .Include(l => l.Bids)
+                .Where(l => l.Status != AuctionStatus.Closed)
+                .ToListAsync();
+
+            var hasChanges = false;
+            foreach (var listing in listings)
+            {
+                hasChanges |= UpdateAuctionStatus(listing);
+            }
+
+            if (hasChanges)
+            {
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task RefreshAuctionStatusAsync(Listing listing)
+        {
+            if (UpdateAuctionStatus(listing))
+            {
+                await _listingsService.SaveChanges();
+            }
+        }
+
+        private static bool UpdateAuctionStatus(Listing listing)
+        {
+            var now = DateTime.Now;
+            var originalStatus = listing.Status;
+            var originalIsSold = listing.IsSold;
+            var originalWinnerUserId = listing.WinnerUserId;
+
+            if (listing.EndTime <= now || listing.IsSold)
+            {
+                listing.Status = AuctionStatus.Closed;
+                listing.IsSold = true;
+                listing.WinnerUserId = listing.Bids?
+                    .OrderByDescending(b => b.Price)
+                    .FirstOrDefault()?.IdentityUserId;
+            }
+            else if (listing.StartTime <= now)
+            {
+                listing.Status = AuctionStatus.Active;
+                listing.IsSold = false;
+            }
+            else
+            {
+                listing.Status = AuctionStatus.Pending;
+                listing.IsSold = false;
+            }
+
+            return originalStatus != listing.Status
+                || originalIsSold != listing.IsSold
+                || originalWinnerUserId != listing.WinnerUserId;
         }
 
         //// GET: Listings/Edit/5

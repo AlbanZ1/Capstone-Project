@@ -4,6 +4,29 @@
     ViewData["Title"] = "Index";
 }
 
+@functions {
+    private static string FormatTimeRemaining(DateTime endTime)
+    {
+        var remaining = endTime - DateTime.Now;
+        if (remaining <= TimeSpan.Zero)
+        {
+            return "Ended";
+        }
+
+        if (remaining.TotalDays >= 1)
+        {
+            return $"{(int)remaining.TotalDays}d {remaining.Hours}h remaining";
+        }
+
+        if (remaining.TotalHours >= 1)
+        {
+            return $"{remaining.Hours}h {remaining.Minutes}m remaining";
+        }
+
+        return $"{remaining.Minutes}m remaining";
+    }
+}
+
 <h2>Active Listings</h2>
 
 <form asp-action="Index" method="get" class="row g-2 align-items-end">
@@ -34,7 +57,9 @@
                 <h5><a asp-action="Details" asp-route-id="@listing.Id" style="color: black; ">@listing.Title</a></h5>
                 <div>@listing.Description</div>
                 <div>Category: @(listing.Category?.Name ?? "Uncategorized")</div>
-                <div>Bid: @listing.Price.ToString("N2")</div>
+                <div>Current Price: @listing.CurrentPrice.ToString("N2")</div>
+                <div>Status: @listing.Status</div>
+                <div>Time Remaining: @FormatTimeRemaining(listing.EndTime)</div>
                 <div>Listed by: @listing.User.Email</div>
             </div>
         </div>

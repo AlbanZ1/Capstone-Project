@@ -6,13 +6,36 @@
     ViewData["Title"] = "Details";
 }
 
+@functions {
+    private static string FormatTimeRemaining(DateTime endTime)
+    {
+        var remaining = endTime - DateTime.Now;
+        if (remaining <= TimeSpan.Zero)
+        {
+            return "Ended";
+        }
+
+        if (remaining.TotalDays >= 1)
+        {
+            return $"{(int)remaining.TotalDays}d {remaining.Hours}h remaining";
+        }
+
+        if (remaining.TotalHours >= 1)
+        {
+            return $"{remaining.Hours}h {remaining.Minutes}m remaining";
+        }
+
+        return $"{remaining.Minutes}m remaining";
+    }
+}
+
 @if(User.Identity.IsAuthenticated)
 {
-    @if(Model.IsSold == true)
+    @if(Model.Status == AuctionStatus.Closed)
     {
         @foreach(var bid in Model.Bids)
         {
-            @if(bid.Price == Model.Price)
+            @if(bid.IdentityUserId == Model.WinnerUserId)
             {
                 @if(bid.IdentityUserId == userManager.GetUserId(User))
                 {
@@ -39,16 +62,30 @@
         </div>
         <div class="col col-xs-6 col-lg-7">
             <div>@Model.Description</div>
+            <div>Starting Price: $@Model.StartingPrice.ToString("N2")</div>
+            <div>Current Price: $@Model.CurrentPrice.ToString("N2")</div>
+            <div>Status: @Model.Status</div>
+            <div>Time Remaining: @FormatTimeRemaining(Model.EndTime)</div>
             @if(User.Identity.IsAuthenticated)
             {
-                <form asp-action="AddBid" method="post">
+                @if(Model.Status == AuctionStatus.Active)
+                {
+                    <form asp-action="AddBid" method="post">
+                        <div>
+                            Bid: $ <input type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")"/>
+                            <input type="hidden" name="IdentityUserId" class="form-control" value="@userManager.GetUserId(User)"/>
+                            <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
+                            <input type="submit" class="btn btn-primary" />
+                        </div>
+                    </form>
+                }
+                else
+                {
                     <div>
-                        Bid: $ <input type="number" min="@Model.Price" step="1" name="Price" placeholder="@Model.Price.ToString("N2")"/>
-                        <input type="hidden" name="IdentityUserId" class="form-control" value="@userManager.GetUserId(User)"/>
-                        <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
-                        <input type="submit" class="btn btn-primary" />
+                        Bid: $ <input type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" disabled />
+                        <input disabled type="submit" class="btn btn-primary" />
                     </div>
-                </form>
+                }
                 <p>Bids submitted: @Model.Bids.Count</p>
                 <br>
                 @if(userManager.GetUserId(User) == Model.User.Id)
@@ -64,7 +101,7 @@
             else
             {
                 <div>
-                    Bid: $ <input type="number" min="@Model.Price" step="1" name="Price" placeholder="@Model.Price.ToString("N2")" />
+                    Bid: $ <input type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
                     <input disabled type="submit" class="btn btn-primary" />
                 </div>
                 <p>Bids submitted: @Model.Bids.Count</p>
@@ -76,7 +113,7 @@
             {
                 @if(userManager.GetUserId(User) == Model.User.Id)
                 {
-                    @if(Model.IsSold == false)
+                    @if(Model.Status != AuctionStatus.Closed)
                     {
                         <a asp-action="CloseBidding" asp-route-id="@Model.Id">Close Bidding</a>
                     }
