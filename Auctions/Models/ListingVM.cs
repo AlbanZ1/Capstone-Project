@@ -10,6 +10,19 @@ namespace Auctions.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public double Price { get; set; }
+
+        [Required]
+        [Display(Name = "Starting Price")]
+        public double StartingPrice { get; set; }
+
+        [Required]
+        [Display(Name = "Start Time")]
+        public DateTime StartTime { get; set; } = DateTime.Now;
+
+        [Required]
+        [Display(Name = "End Time")]
+        public DateTime EndTime { get; set; } = DateTime.Now.AddDays(7);
+
         public IFormFile Image { get; set; }
         public bool IsSold { get; set; } = false;
 

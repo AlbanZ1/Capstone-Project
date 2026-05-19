@@ -10,6 +10,12 @@ namespace Auctions.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public double Price { get; set; }
+        public double StartingPrice { get; set; }
+        public double CurrentPrice { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public AuctionStatus Status { get; set; }
+        public string? WinnerUserId { get; set; }
         public string ImagePath { get; set; }
         public bool IsSold { get; set; } = false;
         public int CategoryId { get; set; }
@@ -19,6 +25,9 @@ namespace Auctions.Models
         public string? IdentityUserId { get; set; }
         [ForeignKey("IdentityUserId")]
         public IdentityUser? User { get; set; }
+
+        [ForeignKey("WinnerUserId")]
+        public IdentityUser? Winner { get; set; }
 
         public List<Bid>? Bids { get; set; }
         public List<Comment>? Comments { get; set; }
