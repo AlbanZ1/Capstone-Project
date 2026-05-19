@@ -18,24 +18,35 @@ namespace Auctions.Controllers
         private readonly IBidsService _bidsService;
         private readonly ICommentsService _commentsService;
         private readonly IImageStorageService _imageStorageService;
+        private readonly ApplicationDbContext _context;
 
-        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService)
+        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, ApplicationDbContext context)
         {
             _listingsService = listingsService;
             _bidsService = bidsService;
             _commentsService = commentsService;
             _imageStorageService = imageStorageService;
+            _context = context;
         }
 
         // GET: Listings
-        public async Task<IActionResult> Index(int? pageNumber, string searchString)
+        public async Task<IActionResult> Index(int? pageNumber, string searchString, int? categoryId)
         {
             var applicationDbContext = _listingsService.GetAll();
             int pageSize = 3;
+
+            await PopulateCategorySelectList(categoryId);
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentCategoryId"] = categoryId;
+
             if(!string.IsNullOrEmpty(searchString))
             {
                 applicationDbContext = applicationDbContext.Where(a => a.Title.Contains(searchString));
-                return View(await PaginatedList<Listing>.CreateAsync(applicationDbContext.Where(l => l.IsSold == false).AsNoTracking(), pageNumber ?? 1, pageSize));
+            }
+
+            if (categoryId.HasValue)
+            {
+                applicationDbContext = applicationDbContext.Where(l => l.CategoryId == categoryId.Value);
             }
 
             return View(await PaginatedList<Listing>.CreateAsync(applicationDbContext.Where(l => l.IsSold == false).AsNoTracking(), pageNumber ?? 1, pageSize));
@@ -45,6 +56,8 @@ namespace Auctions.Controllers
         {
             var applicationDbContext = _listingsService.GetAll();
             int pageSize = 3;
+
+            await PopulateCategorySelectList();
 
             return View("Index", await PaginatedList<Listing>.CreateAsync(applicationDbContext.Where(l => l.IdentityUserId == User.FindFirstValue(ClaimTypes.NameIdentifier)).AsNoTracking(), pageNumber ?? 1, pageSize));
         }
@@ -76,8 +89,9 @@ namespace Auctions.Controllers
         }
 
         // GET: Listings/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await PopulateCategorySelectList();
             return View();
         }
 
@@ -88,7 +102,7 @@ namespace Auctions.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ListingVM listing)
         {
-            if (listing.Image != null)
+            if (ModelState.IsValid && listing.Image != null)
             {
                 var imagePath = await _imageStorageService.UploadListingImageAsync(listing.Image);
 
@@ -99,13 +113,24 @@ namespace Auctions.Controllers
                     Price = listing.Price,
                     IdentityUserId = listing.IdentityUserId,
                     ImagePath = imagePath,
+                    CategoryId = listing.CategoryId,
                 };
 
                 await _listingsService.Add(listObj);
                 return RedirectToAction("Index");
             }
 
+            await PopulateCategorySelectList(listing.CategoryId);
             return View(listing);
+        }
+
+        private async Task PopulateCategorySelectList(int? selectedCategoryId = null)
+        {
+            ViewData["Categories"] = new SelectList(
+                await _context.Categories.OrderBy(c => c.Name).AsNoTracking().ToListAsync(),
+                "Id",
+                "Name",
+                selectedCategoryId);
         }
 
         [HttpPost]

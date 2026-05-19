@@ -12,6 +12,8 @@ namespace Auctions.Models
         public double Price { get; set; }
         public string ImagePath { get; set; }
         public bool IsSold { get; set; } = false;
+        public int CategoryId { get; set; }
+        public Category? Category { get; set; }
 
         [Required]
         public string? IdentityUserId { get; set; }

@@ -20,7 +20,9 @@ namespace Auctions.Data.Services
 
         public IQueryable<Listing> GetAll()
         {
-            var applicationDbContext = _context.Listings.Include(l => l.User);
+            var applicationDbContext = _context.Listings
+                .Include(l => l.User)
+                .Include(l => l.Category);
             return applicationDbContext;
         }
 
@@ -28,7 +30,9 @@ namespace Auctions.Data.Services
         {
             var listing = await _context.Listings
                 .Include(l => l.User)
+                .Include(l => l.Category)
                 .Include(l => l.Comments)
+                .ThenInclude(l => l.User)
                 .Include(l => l.Bids)
                 .ThenInclude(l => l.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
