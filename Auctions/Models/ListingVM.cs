@@ -14,6 +14,10 @@ namespace Auctions.Models
         public bool IsSold { get; set; } = false;
 
         [Required]
+        [Display(Name = "Category")]
+        public int CategoryId { get; set; }
+
+        [Required]
         public string? IdentityUserId { get; set; }
         [ForeignKey("IdentityUserId")]
         public IdentityUser? User { get; set; }
