@@ -66,14 +66,15 @@
             <div>Current Price: $@Model.CurrentPrice.ToString("N2")</div>
             <div>Status: @Model.Status</div>
             <div>Time Remaining: @FormatTimeRemaining(Model.EndTime)</div>
+            <div asp-validation-summary="All" class="text-danger"></div>
             @if(User.Identity.IsAuthenticated)
             {
                 @if(Model.Status == AuctionStatus.Active)
                 {
                     <form asp-action="AddBid" method="post">
+                        @Html.AntiForgeryToken()
                         <div>
                             Bid: $ <input type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")"/>
-                            <input type="hidden" name="IdentityUserId" class="form-control" value="@userManager.GetUserId(User)"/>
                             <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
                             <input type="submit" class="btn btn-primary" />
                         </div>
