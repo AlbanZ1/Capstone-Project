@@ -8,6 +8,7 @@ namespace Auctions.Models
     {
         public int Id { get; set; }
         public double Price { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [Required]
         public string? IdentityUserId { get; set; }

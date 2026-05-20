@@ -19,6 +19,10 @@ namespace Auctions.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Bid>()
+                .Property(b => b.CreatedAt)
+                .HasDefaultValueSql("GETDATE()");
+
             builder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Electronics" },
                 new Category { Id = 2, Name = "Vehicles" },

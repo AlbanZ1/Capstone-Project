@@ -9,6 +9,7 @@ using Auctions.Data;
 using Auctions.Models;
 using Auctions.Data.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Auctions.Controllers
 {
@@ -157,10 +158,12 @@ namespace Auctions.Controllers
                 selectedCategoryId);
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult> AddBid([Bind("Id, Price, ListingId, IdentityUserId")] Bid bid)
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> AddBid(int listingId, double price)
         {
-            var listing = await _listingsService.GetById(bid.ListingId);
+            var listing = await _listingsService.GetById(listingId);
             if (listing == null)
             {
                 return NotFound();
@@ -168,13 +171,56 @@ namespace Auctions.Controllers
 
             await RefreshAuctionStatusAsync(listing);
 
-            if (listing.Status == AuctionStatus.Active && ModelState.IsValid && bid.Price > listing.CurrentPrice)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var now = DateTime.Now;
+
+            if (string.IsNullOrEmpty(userId))
             {
-                await _bidsService.Add(bid);
-                listing.Price = bid.Price;
-                listing.CurrentPrice = bid.Price;
-                await _listingsService.SaveChanges();
+                return Challenge();
             }
+
+            if (listing.IdentityUserId == userId)
+            {
+                ModelState.AddModelError(nameof(price), "You cannot bid on your own listing.");
+            }
+
+            if (listing.Status == AuctionStatus.Closed || listing.IsSold)
+            {
+                ModelState.AddModelError(nameof(price), "This auction is closed and no longer accepts bids.");
+            }
+
+            if (now < listing.StartTime)
+            {
+                ModelState.AddModelError(nameof(price), $"Bidding starts on {listing.StartTime:g}.");
+            }
+
+            if (now > listing.EndTime)
+            {
+                ModelState.AddModelError(nameof(price), "This auction has ended and no longer accepts bids.");
+            }
+
+            if (price <= listing.CurrentPrice)
+            {
+                ModelState.AddModelError(nameof(price), $"Your bid must be greater than the current price of ${listing.CurrentPrice:N2}.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View("Details", listing);
+            }
+
+            var bid = new Bid
+            {
+                Price = price,
+                ListingId = listing.Id,
+                IdentityUserId = userId,
+                CreatedAt = now
+            };
+
+            listing.Price = price;
+            listing.CurrentPrice = price;
+
+            await _bidsService.Add(bid);
 
             return View("Details", listing);
         }
