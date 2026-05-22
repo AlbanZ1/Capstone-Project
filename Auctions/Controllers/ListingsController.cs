@@ -8,8 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Auctions.Data;
 using Auctions.Models;
 using Auctions.Data.Services;
+using Auctions.Hubs;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Auctions.Controllers
 {
@@ -20,14 +22,16 @@ namespace Auctions.Controllers
         private readonly ICommentsService _commentsService;
         private readonly IImageStorageService _imageStorageService;
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<AuctionHub> _auctionHubContext;
 
-        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, ApplicationDbContext context)
+        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, ApplicationDbContext context, IHubContext<AuctionHub> auctionHubContext)
         {
             _listingsService = listingsService;
             _bidsService = bidsService;
             _commentsService = commentsService;
             _imageStorageService = imageStorageService;
             _context = context;
+            _auctionHubContext = auctionHubContext;
         }
 
         // GET: Listings
@@ -221,6 +225,17 @@ namespace Auctions.Controllers
             listing.CurrentPrice = price;
 
             await _bidsService.Add(bid);
+
+            var bidUpdate = new AuctionBidUpdate(
+                listing.CurrentPrice,
+                bid.Price,
+                User.Identity?.Name ?? "Auction user",
+                await _context.Bids.CountAsync(b => b.ListingId == listing.Id),
+                bid.CreatedAt);
+
+            await _auctionHubContext.Clients
+                .Group(AuctionHub.ListingGroupName(listing.Id))
+                .SendAsync("BidPlaced", bidUpdate);
 
             return View("Details", listing);
         }
