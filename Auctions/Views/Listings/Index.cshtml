@@ -1,7 +1,10 @@
 ﻿@model PaginatedList<Auctions.Models.Listing>
 
 @{
-    ViewData["Title"] = "Index";
+    var listingAction = ViewData["CurrentListingAction"] as string ?? "Index";
+    var isMyListings = listingAction == "MyListings" || ViewData["MineOnly"] as bool? == true;
+    ViewData["Title"] = isMyListings ? "My Listings" : "Active Listings";
+    var categories = ViewData["Categories"] as SelectList;
 }
 
 @functions {
@@ -25,49 +28,148 @@
 
         return $"{remaining.Minutes}m remaining";
     }
+
+    private static string GetStatusClass(AuctionStatus status)
+    {
+        return status switch
+        {
+            AuctionStatus.Active => "status-active",
+            AuctionStatus.Pending => "status-pending",
+            _ => "status-closed"
+        };
+    }
+
+    private static string GetCategoryIcon(string categoryName)
+    {
+        return categoryName switch
+        {
+            "Electronics" => "fa-laptop",
+            "Vehicles" => "fa-car-side",
+            "Furniture" => "fa-couch",
+            "Clothing" => "fa-shirt",
+            "Books" => "fa-book-open",
+            _ => "fa-box-open"
+        };
+    }
 }
 
-<h2>Active Listings</h2>
+<section class="listing-intro">
+    <div>
+        <p class="section-kicker">@(isMyListings ? "Seller dashboard" : "Live marketplace")</p>
+        <h1>@(isMyListings ? "My Listings" : "Active Auctions")</h1>
+        <p>@(isMyListings ? "Review your lots and keep track of their auction status." : "Search current lots, compare bids, and follow auctions while they are open.")</p>
+    </div>
+    @if(User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-action="Create" class="btn btn-accent">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            Create Listing
+        </a>
+    }
+</section>
 
-<form asp-action="Index" method="get" class="row g-2 align-items-end">
-    <div class="col-md-4">
-        <label for="searchString" class="form-label">Search</label>
-        <input type="text" id="searchString" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" />
+<section class="category-strip" aria-label="Browse categories">
+    <div class="category-strip-header">
+        <h2>Browse Categories</h2>
+        <a asp-action="@listingAction"
+           asp-route-searchString="@ViewData["CurrentFilter"]"
+           asp-route-statusFilter="@ViewData["CurrentStatusFilter"]"
+           asp-route-viewMode="@ViewData["CurrentViewMode"]"
+           asp-route-mineOnly="@ViewData["MineOnly"]">All listings</a>
     </div>
-    <div class="col-md-4">
-        <label for="categoryId" class="form-label">Category</label>
-        <select id="categoryId" name="categoryId" class="form-control" asp-items="@(ViewData["Categories"] as SelectList)">
-            <option value="">All categories</option>
-        </select>
+    <div class="category-grid">
+        @foreach(var category in categories ?? Enumerable.Empty<SelectListItem>())
+        {
+            <a asp-action="@listingAction"
+               asp-route-categoryId="@category.Value"
+               asp-route-searchString="@ViewData["CurrentFilter"]"
+               asp-route-statusFilter="@ViewData["CurrentStatusFilter"]"
+               asp-route-viewMode="@ViewData["CurrentViewMode"]"
+               asp-route-mineOnly="@ViewData["MineOnly"]"
+               class="category-link">
+                <span aria-hidden="true"><i class="fa-solid @GetCategoryIcon(category.Text)"></i></span>
+                @category.Text
+            </a>
+        }
     </div>
-    <div class="col-md-4">
-        <input type="submit" value="Filter" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Clear</a>
+</section>
+
+<form asp-action="@listingAction" method="get" class="market-filter">
+    @if(ViewData["CurrentStatusFilter"] != null)
+    {
+        <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatusFilter"]" />
+    }
+    @if(ViewData["CurrentViewMode"] != null)
+    {
+        <input type="hidden" name="viewMode" value="@ViewData["CurrentViewMode"]" />
+    }
+    @if(ViewData["MineOnly"] as bool? == true)
+    {
+        <input type="hidden" name="mineOnly" value="true" />
+    }
+    <div class="row g-3 align-items-end">
+        <div class="col-lg-6">
+            <label for="searchString" class="form-label">Search listings</label>
+            <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" id="searchString" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Search by title" />
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <label for="categoryId" class="form-label">Category</label>
+            <select id="categoryId" name="categoryId" class="form-select" asp-items="@(categories)">
+                <option value="">All categories</option>
+            </select>
+        </div>
+        <div class="col-md-6 col-lg-3 filter-actions">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a asp-action="@listingAction"
+               asp-route-viewMode="@ViewData["CurrentViewMode"]"
+               asp-route-mineOnly="@ViewData["MineOnly"]"
+               class="btn btn-outline-secondary">Clear</a>
+        </div>
     </div>
 </form>
 
-@foreach(var listing in Model)
-{
-    <div class="container" style="background-color: rgba(138, 129, 133, 0.6); margin-top:50px; margin-bottom: 50px; padding: 20px; border-radius: 10px;">
-        <div class="row">
-            <div class="col col-xs-6 col-lg-5">
-                <img src="@listing.ImagePath" style="max-width: 400px; max-height: 400px;" />
+<section class="auction-grid" aria-label="Auction listings">
+    @foreach(var listing in Model)
+    {
+        <article class="auction-card">
+            <a asp-action="Details" asp-route-id="@listing.Id" class="auction-image-link" aria-label="View @listing.Title details">
+                <img src="@listing.ImagePath" alt="@listing.Title" class="auction-image" />
+            </a>
+            <div class="auction-card-body">
+                <div class="auction-meta-row">
+                    <span class="category-pill">@(listing.Category?.Name ?? "Uncategorized")</span>
+                    <span class="status-badge @GetStatusClass(listing.Status)">@listing.Status</span>
+                </div>
+                <h2><a asp-action="Details" asp-route-id="@listing.Id">@listing.Title</a></h2>
+                <dl class="auction-stats">
+                    <div>
+                        <dt>Current price</dt>
+                        <dd>$@listing.CurrentPrice.ToString("N2")</dd>
+                    </div>
+                    <div>
+                        <dt>Time remaining</dt>
+                        <dd>@FormatTimeRemaining(listing.EndTime)</dd>
+                    </div>
+                </dl>
+                @if(listing.Bids != null)
+                {
+                    <p class="bid-count"><i class="fa-solid fa-signal" aria-hidden="true"></i> @listing.Bids.Count bids</p>
+                }
+                <a asp-action="Details" asp-route-id="@listing.Id" class="btn btn-primary w-100">View Details</a>
             </div>
-            <div class="col col-xs-6 col-lg-7">
-                <h5><a asp-action="Details" asp-route-id="@listing.Id" style="color: black; ">@listing.Title</a></h5>
-                <div>@listing.Description</div>
-                <div>Category: @(listing.Category?.Name ?? "Uncategorized")</div>
-                <div>Current Price: @listing.CurrentPrice.ToString("N2")</div>
-                <div>Status: @listing.Status</div>
-                <div>Time Remaining: @FormatTimeRemaining(listing.EndTime)</div>
-                <div>Listed by: @listing.User.Email</div>
-            </div>
-        </div>
-    </div>
-}
+        </article>
+    }
+</section>
 @if(!Model.Any())
 {
-    <p>No Active Listings</p>
+    <div class="empty-state">
+        <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
+        <h2>No @(isMyListings ? "listings" : "active listings") found</h2>
+        <p>Try a broader search or clear the current category filter.</p>
+    </div>
 }
 
 @{
@@ -75,22 +177,28 @@
     var nextDisabled = !Model.HasNextPage ? "disabled" : "";
 }
 
-<div class="d-flex justify-content-center">
-    <a asp-action="Index"
+<nav class="pagination-shell" aria-label="Listing pages">
+    <a asp-action="@listingAction"
         asp-route-pageNumber="@(Model.PageIndex - 1)"
         asp-route-searchString="@ViewData["CurrentFilter"]"
         asp-route-categoryId="@ViewData["CurrentCategoryId"]"
-        class="btn btn-default @prevDisabled">
+        asp-route-statusFilter="@ViewData["CurrentStatusFilter"]"
+        asp-route-viewMode="@ViewData["CurrentViewMode"]"
+        asp-route-mineOnly="@ViewData["MineOnly"]"
+        class="btn btn-outline-secondary @prevDisabled">
         Previous
     </a>
-    <div class="btn" style="cursor: default">
+    <div class="page-status">
         Page @Model.PageIndex of @Model.TotalPages
     </div>
-    <a asp-action="Index"
+    <a asp-action="@listingAction"
         asp-route-pageNumber="@(Model.PageIndex + 1)"
         asp-route-searchString="@ViewData["CurrentFilter"]"
         asp-route-categoryId="@ViewData["CurrentCategoryId"]"
-        class="btn btn-default @nextDisabled">
+        asp-route-statusFilter="@ViewData["CurrentStatusFilter"]"
+        asp-route-viewMode="@ViewData["CurrentViewMode"]"
+        asp-route-mineOnly="@ViewData["MineOnly"]"
+        class="btn btn-outline-secondary @nextDisabled">
         Next
     </a>
-</div>
+</nav>

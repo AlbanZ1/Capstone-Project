@@ -1,8 +1,26 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Auction Marketplace";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="marketplace-home">
+    <div class="home-content">
+        <p class="section-kicker">Live auction marketplace</p>
+        <h1>Discover listings worth bidding on.</h1>
+        <p>Browse active auctions by category, watch live price changes, and open each lot for the full details before bidding.</p>
+        <div class="home-actions">
+            <a asp-controller="Listings" asp-action="Index" class="btn btn-primary">Browse Active Listings</a>
+            @if(User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Listings" asp-action="Create" class="btn btn-accent">Create Listing</a>
+            }
+        </div>
+    </div>
+    <nav class="home-categories" aria-label="Featured categories">
+        <a asp-controller="Listings" asp-action="Index" asp-route-categoryId="1"><i class="fa-solid fa-laptop" aria-hidden="true"></i> Electronics</a>
+        <a asp-controller="Listings" asp-action="Index" asp-route-categoryId="2"><i class="fa-solid fa-car-side" aria-hidden="true"></i> Vehicles</a>
+        <a asp-controller="Listings" asp-action="Index" asp-route-categoryId="3"><i class="fa-solid fa-couch" aria-hidden="true"></i> Furniture</a>
+        <a asp-controller="Listings" asp-action="Index" asp-route-categoryId="4"><i class="fa-solid fa-shirt" aria-hidden="true"></i> Clothing</a>
+        <a asp-controller="Listings" asp-action="Index" asp-route-categoryId="5"><i class="fa-solid fa-book-open" aria-hidden="true"></i> Books</a>
+        <a asp-controller="Listings" asp-action="Index" asp-route-categoryId="6"><i class="fa-solid fa-box-open" aria-hidden="true"></i> Other</a>
+    </nav>
+</section>

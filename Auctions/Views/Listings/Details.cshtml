@@ -3,7 +3,11 @@
 @inject UserManager<IdentityUser> userManager
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Title;
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var currentUserId = userManager.GetUserId(User);
+    var bids = Model.Bids ?? Enumerable.Empty<Bid>();
+    var comments = Model.Comments ?? Enumerable.Empty<Comment>();
 }
 
 @functions {
@@ -27,110 +31,166 @@
 
         return $"{remaining.Minutes}m remaining";
     }
-}
 
-@if(User.Identity.IsAuthenticated)
-{
-    @if(Model.Status == AuctionStatus.Closed)
+    private static string GetStatusClass(AuctionStatus status)
     {
-        @if(Model.WinnerUserId == null)
+        return status switch
         {
-            <h5>Bidding is closed with no winner.</h5>
-        }
-        else if(Model.WinnerUserId == userManager.GetUserId(User))
-        {
-            <h5>Congratulations, you are the winner!</h5>
-        }
-        else if (userManager.GetUserId(User) == Model.User.Id)
-        {
-            <h5>@Model.Winner?.UserName is the winner!</h5>
-        }
-        else
-        {
-            <h5>Bidding is closed! Winner: @Model.Winner?.UserName</h5>
-        }
+            AuctionStatus.Active => "status-active",
+            AuctionStatus.Pending => "status-pending",
+            _ => "status-closed"
+        };
     }
 }
 
-<h4 style="text-align: center">@Model.Title</h4>
-<div class="container" style="background-color: rgba(138, 129, 133, 0.6); margin-top: 50px; margin-bottom: 50px; padding: 20px; border-radius: 10px;">
-    <div class="row">
-        <div class="col col-xs-6 col-lg-5">
-            <img src="@Model.ImagePath" style="width: 100%; max-height: 60vh;" />
+<section class="detail-heading">
+    <a asp-action="Index" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Active listings</a>
+    <div class="detail-title-row">
+        <div>
+            <p class="section-kicker">@(Model.Category?.Name ?? "Uncategorized")</p>
+            <h1>@Model.Title</h1>
         </div>
-        <div class="col col-xs-6 col-lg-7">
-            <div>@Model.Description</div>
-            <div>Starting Price: $@Model.StartingPrice.ToString("N2")</div>
-            <div>
-                Current Price:
-                <span id="current-price">$@Model.CurrentPrice.ToString("N2")</span>
+        <span class="status-badge detail-status @GetStatusClass(Model.Status)">@Model.Status</span>
+    </div>
+</section>
+
+@if(isAuthenticated && Model.Status == AuctionStatus.Closed)
+{
+    <div class="winner-banner">
+        <i class="fa-solid fa-trophy" aria-hidden="true"></i>
+        @if(Model.WinnerUserId == null)
+        {
+            <span>Bidding is closed with no winner.</span>
+        }
+        else if(Model.WinnerUserId == currentUserId)
+        {
+            <span>Congratulations, you are the winner.</span>
+        }
+        else if (currentUserId == Model.IdentityUserId)
+        {
+            <span>@Model.Winner?.UserName is the winner.</span>
+        }
+        else
+        {
+            <span>Bidding is closed. Winner: @Model.Winner?.UserName</span>
+        }
+    </div>
+}
+
+<section class="detail-layout">
+    <div class="detail-main">
+        <div class="detail-media">
+            <img src="@Model.ImagePath" alt="@Model.Title" />
+        </div>
+        <article class="surface-panel detail-description">
+            <h2>Description</h2>
+            <p>@Model.Description</p>
+        </article>
+    </div>
+
+    <aside class="detail-sidebar">
+        <section class="surface-panel price-panel">
+            <div class="price-summary">
+                <span>Current price</span>
+                <strong id="current-price">$@Model.CurrentPrice.ToString("N2")</strong>
             </div>
-            <div>Status: @Model.Status</div>
-            <div>Time Remaining: @FormatTimeRemaining(Model.EndTime)</div>
-            @if(Model.Status == AuctionStatus.Closed)
-            {
-                <div>Winner: @(Model.Winner?.UserName ?? "No winner")</div>
-            }
-            <div asp-validation-summary="All" class="text-danger"></div>
-            @if(User.Identity.IsAuthenticated)
+            <dl class="detail-facts">
+                <div>
+                    <dt>Starting price</dt>
+                    <dd>$@Model.StartingPrice.ToString("N2")</dd>
+                </div>
+                <div>
+                    <dt>Time remaining</dt>
+                    <dd>@FormatTimeRemaining(Model.EndTime)</dd>
+                </div>
+                <div>
+                    <dt>Listed by</dt>
+                    <dd>@(Model.User?.UserName ?? "Auction user")</dd>
+                </div>
+                @if(Model.Status == AuctionStatus.Closed)
+                {
+                    <div>
+                        <dt>Winner</dt>
+                        <dd>@(Model.Winner?.UserName ?? "No winner")</dd>
+                    </div>
+                }
+            </dl>
+
+            <div asp-validation-summary="All" class="validation-summary text-danger"></div>
+            @if(isAuthenticated)
             {
                 @if(Model.Status == AuctionStatus.Active)
                 {
-                    <form asp-action="AddBid" method="post">
+                    <form asp-action="AddBid" method="post" class="bid-form">
                         @Html.AntiForgeryToken()
-                        <div>
-                            Bid: $ <input id="bid-price-input" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")"/>
+                        <label for="bid-price-input" class="form-label">Your bid</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input id="bid-price-input" class="form-control" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
                             <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
-                            <input type="submit" class="btn btn-primary" />
+                            <button type="submit" class="btn btn-primary">Place Bid</button>
                         </div>
                     </form>
                 }
                 else
                 {
-                    <div>
-                        Bid: $ <input id="bid-price-input" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" disabled />
-                        <input disabled type="submit" class="btn btn-primary" />
+                    <div class="bid-form">
+                        <label for="bid-price-input" class="form-label">Your bid</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input id="bid-price-input" class="form-control" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" disabled />
+                            <button disabled type="submit" class="btn btn-primary">Place Bid</button>
+                        </div>
                     </div>
-                }
-                <p>Bids submitted: <span id="bid-count">@Model.Bids.Count</span></p>
-                <br>
-                @if(userManager.GetUserId(User) == Model.User.Id)
-                {
-                    @foreach(var bid in Model.Bids)
-                    {
-                        <ul style="list-style-type: none;">
-                            @bid.User.UserName bidded $@bid.Price.ToString("N2").
-                        </ul>
-                    }
                 }
             }
             else
             {
-                <div>
-                    Bid: $ <input id="bid-price-input" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
-                    <input disabled type="submit" class="btn btn-primary" />
+                <div class="bid-form">
+                    <label for="bid-price-input" class="form-label">Your bid</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input id="bid-price-input" class="form-control" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
+                        <button disabled type="submit" class="btn btn-primary">Sign in to Bid</button>
+                    </div>
                 </div>
-                <p>Bids submitted: <span id="bid-count">@Model.Bids.Count</span></p>
             }
 
-            <div id="latest-bid" aria-live="polite"></div>
-            <div>Listed by: @Model.User.UserName</div>
+            <div class="live-bid-panel">
+                <p>Bids submitted <strong id="bid-count">@bids.Count()</strong></p>
+                <div id="latest-bid" aria-live="polite">Live bid updates appear here.</div>
+            </div>
 
-            @if(User.Identity.IsAuthenticated)
+            @if(isAuthenticated && currentUserId == Model.IdentityUserId && Model.Status != AuctionStatus.Closed)
             {
-                @if(userManager.GetUserId(User) == Model.User.Id)
-                {
-                    @if(Model.Status != AuctionStatus.Closed)
-                    {
-                        <a asp-action="CloseBidding" asp-route-id="@Model.Id">Close Bidding</a>
-                    }
-                    
-                }
+                <a asp-action="CloseBidding" asp-route-id="@Model.Id" class="btn btn-outline-secondary w-100">Close Bidding</a>
             }
+        </section>
 
-        </div>
-    </div>
-</div>
+        @if(isAuthenticated && currentUserId == Model.IdentityUserId)
+        {
+            <section class="surface-panel bid-history">
+                <h2>Bid History</h2>
+                @if(bids.Any())
+                {
+                    <ol>
+                        @foreach(var bid in bids.OrderByDescending(b => b.Price))
+                        {
+                            <li>
+                                <span>@(bid.User?.UserName ?? "Auction user")</span>
+                                <strong>$@bid.Price.ToString("N2")</strong>
+                            </li>
+                        }
+                    </ol>
+                }
+                else
+                {
+                    <p>No bids submitted yet.</p>
+                }
+            </section>
+        }
+    </aside>
+</section>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
@@ -177,35 +237,46 @@
     </script>
 }
 
-<br>
+<section class="surface-panel comments-panel">
+    <div class="comments-grid">
+        @if(isAuthenticated)
+        {
+            <form asp-action="AddComment" method="post" class="comment-form">
+                @Html.AntiForgeryToken()
+                <h2>Add Comment</h2>
+                <label for="comment-content" class="form-label">Message</label>
+                <textarea id="comment-content" class="form-control" aria-label="Comment message" name="Content" rows="4"></textarea>
+                <input type="hidden" name="IdentityUserId" class="form-control" value="@currentUserId" />
+                <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
+                <input type="submit" class="btn btn-primary" value="Post Comment" />
+            </form>
+        }
+        else
+        {
+            <div class="comment-form">
+                <h2>Add Comment</h2>
+                <label for="comment-content" class="form-label">Message</label>
+                <textarea id="comment-content" class="form-control" aria-label="Comment message" name="Content" rows="4"></textarea>
+                <input type="submit" disabled class="btn btn-primary" value="Sign in to Comment" />
+            </div>
+        }
 
-@if(User.Identity.IsAuthenticated)
-{
-    <div class="container">
-        <form asp-action="AddComment" method="post">
-            <h6>Add comment</h6>
-            <textarea class="form-control" aria-label="With textarea" name="Content" style="width: 40%; vertical-align: top;"></textarea>
-            <input type="hidden" name="IdentityUserId" class="form-control" value="@userManager.GetUserId(User)" />
-            <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
-            <input type="submit" class="btn btn-primary" style="display: inline-block; margin-top: 10px;" />
-        </form>
-    </div>
-}
-else
-{
-    <div class="container">
-            <h6>Add comment</h6>
-            <textarea class="form-control" aria-label="With textarea" name="Content" style="width: 40%; vertical-align: top;"></textarea>
-            <input type="submit" disabled class="btn btn-primary" style="display: inline-block; margin-top: 10px;" />
-    </div>
-}
-<br>
-<div class="container">
-    <h6>Comments</h6>
-    @foreach(var comment in Model.Comments)
-    {
-        <div style="border: 1px solid lightgray; margin: 10px; padding: 10px; border-radius: 10px; width: 40%;">
-            <p>@comment.Content - @comment.User.UserName</p>
+        <div class="comment-list">
+            <h2>Comments</h2>
+            @if(comments.Any())
+            {
+                @foreach(var comment in comments)
+                {
+                    <article class="comment-card">
+                        <p>@comment.Content</p>
+                        <span>@(comment.User?.UserName ?? "Auction user")</span>
+                    </article>
+                }
+            }
+            else
+            {
+                <p>No comments yet.</p>
+            }
         </div>
-    }
-</div>
+    </div>
+</section>
