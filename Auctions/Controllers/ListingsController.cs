@@ -17,6 +17,8 @@ namespace Auctions.Controllers
 {
     public class ListingsController : Controller
     {
+        private const int ListingsPageSize = 9;
+
         private readonly IListingsService _listingsService;
         private readonly IBidsService _bidsService;
         private readonly ICommentsService _commentsService;
@@ -35,40 +37,51 @@ namespace Auctions.Controllers
         }
 
         // GET: Listings
-        public async Task<IActionResult> Index(int? pageNumber, string searchString, int? categoryId)
+        public async Task<IActionResult> Index(int? pageNumber, string searchString, int? categoryId, AuctionStatus? statusFilter, string viewMode, bool mineOnly = false)
         {
             await RefreshAuctionStatusesAsync();
 
             var applicationDbContext = _listingsService.GetAll();
-            int pageSize = 3;
 
             await PopulateCategorySelectList(categoryId);
-            ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentCategoryId"] = categoryId;
+            PopulateListingViewState(nameof(Index), searchString, categoryId, statusFilter, viewMode, mineOnly);
 
-            if(!string.IsNullOrEmpty(searchString))
+            applicationDbContext = ApplyListingFilters(applicationDbContext, searchString, categoryId, statusFilter);
+
+            if (mineOnly)
             {
-                applicationDbContext = applicationDbContext.Where(a => a.Title.Contains(searchString));
+                applicationDbContext = applicationDbContext.Where(l => l.IdentityUserId == User.FindFirstValue(ClaimTypes.NameIdentifier));
             }
 
-            if (categoryId.HasValue)
+            if (!statusFilter.HasValue)
             {
-                applicationDbContext = applicationDbContext.Where(l => l.CategoryId == categoryId.Value);
+                applicationDbContext = applicationDbContext.Where(l => l.Status != AuctionStatus.Closed);
             }
 
-            return View(await PaginatedList<Listing>.CreateAsync(applicationDbContext.Where(l => l.Status != AuctionStatus.Closed).AsNoTracking(), pageNumber ?? 1, pageSize));
+            return View(await PaginatedList<Listing>.CreateAsync(
+                applicationDbContext.OrderByDescending(l => l.Id).AsNoTracking(),
+                pageNumber ?? 1,
+                ListingsPageSize));
         }
 
-        public async Task<IActionResult> MyListings(int? pageNumber)
+        public async Task<IActionResult> MyListings(int? pageNumber, string searchString, int? categoryId, AuctionStatus? statusFilter, string viewMode)
         {
             await RefreshAuctionStatusesAsync();
 
             var applicationDbContext = _listingsService.GetAll();
-            int pageSize = 3;
 
-            await PopulateCategorySelectList();
+            await PopulateCategorySelectList(categoryId);
+            PopulateListingViewState(nameof(MyListings), searchString, categoryId, statusFilter, viewMode, true);
 
-            return View("Index", await PaginatedList<Listing>.CreateAsync(applicationDbContext.Where(l => l.IdentityUserId == User.FindFirstValue(ClaimTypes.NameIdentifier)).AsNoTracking(), pageNumber ?? 1, pageSize));
+            applicationDbContext = ApplyListingFilters(applicationDbContext, searchString, categoryId, statusFilter);
+
+            return View("Index", await PaginatedList<Listing>.CreateAsync(
+                applicationDbContext
+                    .Where(l => l.IdentityUserId == User.FindFirstValue(ClaimTypes.NameIdentifier))
+                    .OrderByDescending(l => l.Id)
+                    .AsNoTracking(),
+                pageNumber ?? 1,
+                ListingsPageSize));
         }
 
         public async Task<IActionResult> MyBids(int? pageNumber)
@@ -160,6 +173,36 @@ namespace Auctions.Controllers
                 "Id",
                 "Name",
                 selectedCategoryId);
+        }
+
+        private static IQueryable<Listing> ApplyListingFilters(IQueryable<Listing> listings, string searchString, int? categoryId, AuctionStatus? statusFilter)
+        {
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                listings = listings.Where(a => a.Title.Contains(searchString));
+            }
+
+            if (categoryId.HasValue)
+            {
+                listings = listings.Where(l => l.CategoryId == categoryId.Value);
+            }
+
+            if (statusFilter.HasValue)
+            {
+                listings = listings.Where(l => l.Status == statusFilter.Value);
+            }
+
+            return listings;
+        }
+
+        private void PopulateListingViewState(string action, string searchString, int? categoryId, AuctionStatus? statusFilter, string viewMode, bool mineOnly)
+        {
+            ViewData["CurrentListingAction"] = action;
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentCategoryId"] = categoryId;
+            ViewData["CurrentStatusFilter"] = statusFilter;
+            ViewData["CurrentViewMode"] = viewMode;
+            ViewData["MineOnly"] = mineOnly;
         }
 
         [Authorize]
@@ -256,13 +299,22 @@ namespace Auctions.Controllers
             return View("Details", listing);
         }
         [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddComment([Bind("Id, Content, ListingId, IdentityUserId")] Comment comment)
         {
             if(ModelState.IsValid)
             {
                 await _commentsService.Add(comment);
+                return RedirectToAction(nameof(Details), new { id = comment.ListingId });
             }
+
             var listing = await _listingsService.GetById(comment.ListingId);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
             return View("Details", listing);
         }
 
