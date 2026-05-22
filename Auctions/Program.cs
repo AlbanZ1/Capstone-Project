@@ -1,5 +1,6 @@
 ﻿using Auctions.Data;
 using Auctions.Data.Services;
+using Auctions.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,12 +18,11 @@ var builder = WebApplication.CreateBuilder(args);
 //var sqlConnectionString = builder.Configuration["SQLConnectionString"];
 //var storageConnectionString = builder.Configuration["AzureStorageConnectionString"];
 
-// Read connection strings from appsettings.json
 var sqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrEmpty(sqlConnectionString))
 {
-    throw new InvalidOperationException("Connection string 'SQLConnectionString' not found in appsettings.json.");
+    throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
 }
 
 // Add services to the container.
@@ -34,11 +34,13 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IListingsService, ListingsService>();
 builder.Services.AddScoped<IBidsService, BidsService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
 builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
+builder.Services.AddHostedService<AuctionClosingService>();
 
 var app = builder.Build();
 
@@ -60,8 +62,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<AuctionHub>("/auctionHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Listings}/{action=Index}/{id?}");

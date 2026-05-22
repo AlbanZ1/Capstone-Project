@@ -33,23 +33,21 @@
 {
     @if(Model.Status == AuctionStatus.Closed)
     {
-        @foreach(var bid in Model.Bids)
+        @if(Model.WinnerUserId == null)
         {
-            @if(bid.IdentityUserId == Model.WinnerUserId)
-            {
-                @if(bid.IdentityUserId == userManager.GetUserId(User))
-                {
-                    <h5>Congratulations, you are the winner!</h5>
-                }
-                else if (userManager.GetUserId(User) == Model.User.Id)
-                {
-                    <h5>@bid.User.UserName is the winner!</h5>
-                }
-                else
-                {
-                    <h5>Bidding is closed!</h5>
-                }
-            }
+            <h5>Bidding is closed with no winner.</h5>
+        }
+        else if(Model.WinnerUserId == userManager.GetUserId(User))
+        {
+            <h5>Congratulations, you are the winner!</h5>
+        }
+        else if (userManager.GetUserId(User) == Model.User.Id)
+        {
+            <h5>@Model.Winner?.UserName is the winner!</h5>
+        }
+        else
+        {
+            <h5>Bidding is closed! Winner: @Model.Winner?.UserName</h5>
         }
     }
 }
@@ -63,9 +61,16 @@
         <div class="col col-xs-6 col-lg-7">
             <div>@Model.Description</div>
             <div>Starting Price: $@Model.StartingPrice.ToString("N2")</div>
-            <div>Current Price: $@Model.CurrentPrice.ToString("N2")</div>
+            <div>
+                Current Price:
+                <span id="current-price">$@Model.CurrentPrice.ToString("N2")</span>
+            </div>
             <div>Status: @Model.Status</div>
             <div>Time Remaining: @FormatTimeRemaining(Model.EndTime)</div>
+            @if(Model.Status == AuctionStatus.Closed)
+            {
+                <div>Winner: @(Model.Winner?.UserName ?? "No winner")</div>
+            }
             <div asp-validation-summary="All" class="text-danger"></div>
             @if(User.Identity.IsAuthenticated)
             {
@@ -74,7 +79,7 @@
                     <form asp-action="AddBid" method="post">
                         @Html.AntiForgeryToken()
                         <div>
-                            Bid: $ <input type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")"/>
+                            Bid: $ <input id="bid-price-input" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")"/>
                             <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
                             <input type="submit" class="btn btn-primary" />
                         </div>
@@ -83,11 +88,11 @@
                 else
                 {
                     <div>
-                        Bid: $ <input type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" disabled />
+                        Bid: $ <input id="bid-price-input" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" disabled />
                         <input disabled type="submit" class="btn btn-primary" />
                     </div>
                 }
-                <p>Bids submitted: @Model.Bids.Count</p>
+                <p>Bids submitted: <span id="bid-count">@Model.Bids.Count</span></p>
                 <br>
                 @if(userManager.GetUserId(User) == Model.User.Id)
                 {
@@ -102,12 +107,13 @@
             else
             {
                 <div>
-                    Bid: $ <input type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
+                    Bid: $ <input id="bid-price-input" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
                     <input disabled type="submit" class="btn btn-primary" />
                 </div>
-                <p>Bids submitted: @Model.Bids.Count</p>
+                <p>Bids submitted: <span id="bid-count">@Model.Bids.Count</span></p>
             }
 
+            <div id="latest-bid" aria-live="polite"></div>
             <div>Listed by: @Model.User.UserName</div>
 
             @if(User.Identity.IsAuthenticated)
@@ -125,6 +131,51 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script>
+        (() => {
+            const listingId = @Model.Id;
+            const currentPrice = document.getElementById("current-price");
+            const bidCount = document.getElementById("bid-count");
+            const bidInput = document.getElementById("bid-price-input");
+            const latestBid = document.getElementById("latest-bid");
+            const currency = new Intl.NumberFormat(undefined, {
+                style: "currency",
+                currency: "USD"
+            });
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/auctionHub")
+                .withAutomaticReconnect()
+                .build();
+
+            const joinListing = () => connection.invoke("JoinListing", listingId);
+
+            connection.on("BidPlaced", (bid) => {
+                currentPrice.textContent = currency.format(bid.newCurrentPrice);
+                bidCount.textContent = bid.bidCount;
+
+                if (bidInput) {
+                    bidInput.min = (bid.newCurrentPrice + 1).toString();
+                    bidInput.placeholder = bid.newCurrentPrice.toFixed(2);
+                }
+
+                const bidTime = new Date(bid.bidTime).toLocaleString();
+                latestBid.textContent = `Latest bid: ${bid.bidderDisplayName} bid ${currency.format(bid.bidAmount)} at ${bidTime}.`;
+            });
+
+            connection.onreconnected(() => {
+                joinListing().catch(error => console.error(error));
+            });
+
+            connection.start()
+                .then(joinListing)
+                .catch(error => console.error(error));
+        })();
+    </script>
+}
 
 <br>
 

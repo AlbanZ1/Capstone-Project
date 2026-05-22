@@ -30,6 +30,7 @@ namespace Auctions.Data.Services
         {
             var listing = await _context.Listings
                 .Include(l => l.User)
+                .Include(l => l.Winner)
                 .Include(l => l.Category)
                 .Include(l => l.Comments)
                 .ThenInclude(l => l.User)
