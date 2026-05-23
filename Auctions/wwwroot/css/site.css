@@ -74,7 +74,18 @@ h2 {
   justify-content: center;
   gap: 0.5rem;
   font-weight: 600;
+  box-shadow: 0 0.45rem 1rem rgba(18, 32, 51, 0.08);
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.btn:hover:not(:disabled):not(.disabled) {
+  box-shadow: 0 0.75rem 1.35rem rgba(18, 32, 51, 0.14);
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled):not(.disabled) {
+  box-shadow: 0 0.28rem 0.75rem rgba(18, 32, 51, 0.12);
+  transform: translateY(0);
 }
 
 .btn-sm {
@@ -89,7 +100,6 @@ h2 {
 .btn-primary:hover {
   background: var(--market-blue-dark);
   border-color: var(--market-blue-dark);
-  transform: translateY(-1px);
 }
 
 .btn-accent {
@@ -102,7 +112,18 @@ h2 {
   background: #e4b958;
   border-color: #e4b958;
   color: #241900;
-  transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+  background: #fff;
+  border-color: #b8c4d4;
+  color: var(--market-ink-soft);
+}
+
+.btn-outline-secondary:hover {
+  background: #f3f7fc;
+  border-color: #8ea2bc;
+  color: var(--market-ink);
 }
 
 .btn:focus-visible,
@@ -353,6 +374,7 @@ textarea.form-control {
   border: 1px solid var(--market-line);
   border-radius: var(--market-radius);
   box-shadow: 0 0.55rem 1.75rem rgba(18, 32, 51, 0.06);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .category-strip {
@@ -492,6 +514,7 @@ textarea.form-control {
 .category-pill,
 .status-badge {
   border-radius: 999px;
+  border: 1px solid transparent;
   display: inline-flex;
   font-size: 0.8rem;
   font-weight: 800;
@@ -507,16 +530,19 @@ textarea.form-control {
 
 .status-active {
   background: #dff7e7;
+  border-color: #b8e8c6;
   color: var(--market-success);
 }
 
 .status-pending {
   background: #fff0cc;
+  border-color: #f0d48d;
   color: #7a5100;
 }
 
 .status-closed {
   background: #e7ebf1;
+  border-color: #cbd4df;
   color: #445266;
 }
 
@@ -562,6 +588,45 @@ textarea.form-control {
 .detail-facts dd {
   font-weight: 700;
   margin: 0;
+}
+
+.countdown-label {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.62rem;
+  white-space: nowrap;
+}
+
+.countdown-label::before {
+  content: "";
+  background: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  height: 0.45rem;
+  width: 0.45rem;
+}
+
+.countdown-live {
+  background: #e8f2ff;
+  color: var(--market-blue-dark);
+}
+
+.countdown-pending {
+  background: #fff4d7;
+  color: #805600;
+}
+
+.countdown-closed {
+  background: #edf0f4;
+  color: #596679;
+}
+
+.detail-countdown {
+  font-size: 0.98rem;
 }
 
 .bid-count {

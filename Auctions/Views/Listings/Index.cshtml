@@ -8,25 +8,29 @@
 }
 
 @functions {
-    private static string FormatTimeRemaining(DateTime endTime)
+    private static string FormatCountdownDuration(TimeSpan remaining)
     {
-        var remaining = endTime - DateTime.Now;
         if (remaining <= TimeSpan.Zero)
         {
-            return "Ended";
+            return "Closed";
         }
 
-        if (remaining.TotalDays >= 1)
+        return $"{(int)remaining.TotalDays}d {remaining.Hours:00}h {remaining.Minutes:00}m {remaining.Seconds:00}s";
+    }
+
+    private static string FormatCountdownFallback(Listing listing)
+    {
+        if (listing.Status == AuctionStatus.Closed || listing.EndTime <= DateTime.Now)
         {
-            return $"{(int)remaining.TotalDays}d {remaining.Hours}h remaining";
+            return "Closed";
         }
 
-        if (remaining.TotalHours >= 1)
+        if (listing.Status == AuctionStatus.Pending && listing.StartTime > DateTime.Now)
         {
-            return $"{remaining.Hours}h {remaining.Minutes}m remaining";
+            return $"Starts in {FormatCountdownDuration(listing.StartTime - DateTime.Now)}";
         }
 
-        return $"{remaining.Minutes}m remaining";
+        return FormatCountdownDuration(listing.EndTime - DateTime.Now);
     }
 
     private static string GetStatusClass(AuctionStatus status)
@@ -151,7 +155,13 @@
                     </div>
                     <div>
                         <dt>Time remaining</dt>
-                        <dd>@FormatTimeRemaining(listing.EndTime)</dd>
+                        <dd class="countdown-label js-auction-countdown @(listing.Status == AuctionStatus.Closed ? "countdown-closed" : "")"
+                            data-status="@listing.Status"
+                            data-start-time="@listing.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")"
+                            data-end-time="@listing.EndTime.ToString("yyyy-MM-ddTHH:mm:ss")"
+                            aria-live="polite">
+                            @FormatCountdownFallback(listing)
+                        </dd>
                     </div>
                 </dl>
                 @if(listing.Bids != null)

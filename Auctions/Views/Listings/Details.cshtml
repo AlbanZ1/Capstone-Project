@@ -11,25 +11,29 @@
 }
 
 @functions {
-    private static string FormatTimeRemaining(DateTime endTime)
+    private static string FormatCountdownDuration(TimeSpan remaining)
     {
-        var remaining = endTime - DateTime.Now;
         if (remaining <= TimeSpan.Zero)
         {
-            return "Ended";
+            return "Closed";
         }
 
-        if (remaining.TotalDays >= 1)
+        return $"{(int)remaining.TotalDays}d {remaining.Hours:00}h {remaining.Minutes:00}m {remaining.Seconds:00}s";
+    }
+
+    private static string FormatCountdownFallback(Listing listing)
+    {
+        if (listing.Status == AuctionStatus.Closed || listing.EndTime <= DateTime.Now)
         {
-            return $"{(int)remaining.TotalDays}d {remaining.Hours}h remaining";
+            return "Closed";
         }
 
-        if (remaining.TotalHours >= 1)
+        if (listing.Status == AuctionStatus.Pending && listing.StartTime > DateTime.Now)
         {
-            return $"{remaining.Hours}h {remaining.Minutes}m remaining";
+            return $"Starts in {FormatCountdownDuration(listing.StartTime - DateTime.Now)}";
         }
 
-        return $"{remaining.Minutes}m remaining";
+        return FormatCountdownDuration(listing.EndTime - DateTime.Now);
     }
 
     private static string GetStatusClass(AuctionStatus status)
@@ -101,7 +105,13 @@
                 </div>
                 <div>
                     <dt>Time remaining</dt>
-                    <dd>@FormatTimeRemaining(Model.EndTime)</dd>
+                    <dd class="countdown-label detail-countdown js-auction-countdown @(Model.Status == AuctionStatus.Closed ? "countdown-closed" : "")"
+                        data-status="@Model.Status"
+                        data-start-time="@Model.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")"
+                        data-end-time="@Model.EndTime.ToString("yyyy-MM-ddTHH:mm:ss")"
+                        aria-live="polite">
+                        @FormatCountdownFallback(Model)
+                    </dd>
                 </div>
                 <div>
                     <dt>Listed by</dt>
