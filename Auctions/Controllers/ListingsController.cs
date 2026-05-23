@@ -23,15 +23,17 @@ namespace Auctions.Controllers
         private readonly IBidsService _bidsService;
         private readonly ICommentsService _commentsService;
         private readonly IImageStorageService _imageStorageService;
+        private readonly IEmailService _emailService;
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<AuctionHub> _auctionHubContext;
 
-        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, ApplicationDbContext context, IHubContext<AuctionHub> auctionHubContext)
+        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, IEmailService emailService, ApplicationDbContext context, IHubContext<AuctionHub> auctionHubContext)
         {
             _listingsService = listingsService;
             _bidsService = bidsService;
             _commentsService = commentsService;
             _imageStorageService = imageStorageService;
+            _emailService = emailService;
             _context = context;
             _auctionHubContext = auctionHubContext;
         }
@@ -256,6 +258,13 @@ namespace Auctions.Controllers
                 return View("Details", listing);
             }
 
+            var previousHighestBid = listing.Bids?
+                .OrderByDescending(b => b.Price)
+                .ThenBy(b => b.CreatedAt)
+                .FirstOrDefault();
+            var previousHighestBidder = previousHighestBid?.User;
+            var oldHighestBid = listing.CurrentPrice;
+
             var bid = new Bid
             {
                 Price = price,
@@ -279,6 +288,31 @@ namespace Auctions.Controllers
             await _auctionHubContext.Clients
                 .Group(AuctionHub.ListingGroupName(listing.Id))
                 .SendAsync("BidPlaced", bidUpdate);
+
+            if (previousHighestBidder != null && previousHighestBidder.Id != userId)
+            {
+                var listingUrl = Url.Action(nameof(Details), "Listings", new { id = listing.Id }, Request.Scheme)
+                    ?? $"/Listings/Details/{listing.Id}";
+                var bidderDisplayName = User.Identity?.Name ?? "Another bidder";
+                var categoryText = listing.Category?.Name ?? "Uncategorized";
+                var body = $"""
+                    You have been outbid on {listing.Title}.
+
+                    Listing: {listing.Title}
+                    Category: {categoryText}
+                    Previous highest bid: ${oldHighestBid:N2}
+                    New highest bid: ${bid.Price:N2}
+                    New bidder: {bidderDisplayName}
+
+                    View the listing:
+                    {listingUrl}
+                    """;
+
+                await _emailService.SendEmailAsync(
+                    previousHighestBidder.Email ?? string.Empty,
+                    $"You have been outbid on {listing.Title}",
+                    body);
+            }
 
             return View("Details", listing);
         }
