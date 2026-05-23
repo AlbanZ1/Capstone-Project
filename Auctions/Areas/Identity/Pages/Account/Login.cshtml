@@ -1,0 +1,82 @@
+@page
+@model Auctions.Areas.Identity.Pages.Account.LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="identity-auth-page">
+    <div class="identity-auth-panel">
+        <div class="identity-auth-header">
+            <p class="section-kicker">Account access</p>
+            <h1>Log in</h1>
+        </div>
+
+        <form id="account" method="post">
+            <h2>Use your Auctions account</h2>
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label asp-for="Input.Email" class="form-label">Email</label>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                <label asp-for="Input.Password" class="form-label">Password</label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+            <div class="checkbox mb-3">
+                <label asp-for="Input.RememberMe" class="form-label">
+                    <input class="form-check-input" asp-for="Input.RememberMe" />
+                    @Html.DisplayNameFor(m => m.Input.RememberMe)
+                </label>
+            </div>
+            <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                Log in
+            </button>
+            <div class="identity-auth-links">
+                <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
+            </div>
+        </form>
+    </div>
+
+    <aside class="identity-auth-panel identity-external-panel">
+        <div class="identity-auth-header">
+            <p class="section-kicker">External login</p>
+            <h2>Continue faster</h2>
+        </div>
+
+        @if ((Model.ExternalLogins?.Count ?? 0) == 0)
+        {
+            <p class="identity-muted">External login is not configured yet.</p>
+        }
+        else
+        {
+            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                @foreach (var provider in Model.ExternalLogins!)
+                {
+                    var isGoogle = string.Equals(provider.Name, "Google", StringComparison.OrdinalIgnoreCase);
+                    <button type="submit" class="btn btn-google" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                        @if (isGoogle)
+                        {
+                            <span class="google-mark" aria-hidden="true">G</span>
+                            <span>Continue with Google</span>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                            <span>Continue with @provider.DisplayName</span>
+                        }
+                    </button>
+                }
+            </form>
+        }
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

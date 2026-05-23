@@ -985,6 +985,87 @@ main > .row:has(#registerForm) {
   width: 100%;
 }
 
+.identity-auth-page {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.68fr);
+  margin: 0 auto;
+  max-width: 58rem;
+}
+
+.identity-auth-panel {
+  background: #fff;
+  border: 1px solid var(--market-line);
+  border-radius: var(--market-radius);
+  box-shadow: var(--market-shadow);
+  padding: clamp(1.1rem, 3vw, 2rem);
+}
+
+.identity-auth-header {
+  margin-bottom: 1rem;
+}
+
+.identity-auth-header h1,
+.identity-auth-header h2 {
+  margin-bottom: 0;
+}
+
+.identity-auth-panel #account {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+.identity-auth-links {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.identity-muted {
+  color: var(--market-ink-soft);
+  margin-bottom: 0;
+}
+
+.identity-external-panel {
+  align-self: start;
+}
+
+#external-account {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.btn-google {
+  background: #fff;
+  border: 1px solid #b8c4d4;
+  color: var(--market-ink);
+  justify-content: center;
+  width: 100%;
+}
+
+.btn-google:hover {
+  background: #f7f9fc;
+  border-color: #8ea2bc;
+  color: var(--market-ink);
+}
+
+.google-mark {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d7dfe9;
+  border-radius: 50%;
+  color: #4285f4;
+  display: inline-flex;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  height: 1.65rem;
+  justify-content: center;
+  width: 1.65rem;
+}
+
 .marketplace-footer {
   background: #0f1c2c;
   color: rgba(255, 255, 255, 0.76);
@@ -1043,7 +1124,8 @@ main > .row:has(#registerForm) {
   .detail-layout,
   .create-layout,
   .comments-grid,
-  .marketplace-home {
+  .marketplace-home,
+  .identity-auth-page {
     grid-template-columns: 1fr;
   }
 }
