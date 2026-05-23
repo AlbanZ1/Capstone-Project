@@ -54,6 +54,7 @@ builder.Services.AddScoped<IListingsService, ListingsService>();
 builder.Services.AddScoped<IBidsService, BidsService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
 builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddHostedService<AuctionClosingService>();
 
 var app = builder.Build();
