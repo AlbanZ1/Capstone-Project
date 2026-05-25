@@ -1,7 +1,9 @@
-﻿@model PaginatedList<Auctions.Models.Bid>
+@model PaginatedList<Auctions.Models.Bid>
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = "Index";
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 <h2>My Bids</h2>
@@ -17,7 +19,14 @@
                 <h5><a asp-action="Details" asp-route-id="@bid.Listing.Id" style="color: black; ">@bid.Listing.Title</a></h5>
                 <div>@bid.Listing.Description</div>
                 <div>Bid: @bid.Listing.Price.ToString("N2")</div>
-                <div>Listed by: @bid.Listing.User.Email</div>
+                @if (bid.Listing.IdentityUserId == currentUserId || (bid.Listing.Status == AuctionStatus.Closed && bid.Listing.WinnerUserId == currentUserId))
+                {
+                    <div>Listed by: @(bid.Listing.User?.Email ?? "Not available")</div>
+                }
+                else
+                {
+                    <div>Listed by: Private seller</div>
+                }
             </div>
         </div>
     </div>

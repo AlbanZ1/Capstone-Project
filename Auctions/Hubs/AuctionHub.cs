@@ -25,5 +25,7 @@ namespace Auctions.Hubs
         double BidAmount,
         string BidderDisplayName,
         int BidCount,
-        DateTime BidTime);
+        DateTime BidTime,
+        DateTime? UpdatedEndTime,
+        bool AuctionExtended);
 }

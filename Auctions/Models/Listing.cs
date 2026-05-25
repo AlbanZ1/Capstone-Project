@@ -16,6 +16,8 @@ namespace Auctions.Models
         public DateTime EndTime { get; set; }
         public AuctionStatus Status { get; set; }
         public string? WinnerUserId { get; set; }
+        [Required]
+        public string ContactPhoneNumber { get; set; } = string.Empty;
         public string ImagePath { get; set; }
         public bool IsSold { get; set; } = false;
         public int CategoryId { get; set; }

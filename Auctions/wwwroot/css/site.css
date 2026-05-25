@@ -228,6 +228,50 @@ textarea.form-control {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.help-nav-button {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font: inherit;
+}
+
+.help-nav-button:hover:not(:disabled),
+.help-nav-button:active:not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+
+.help-modal .modal-header {
+  align-items: start;
+  border-bottom-color: var(--market-line);
+}
+
+.help-modal .section-kicker {
+  margin-bottom: 0.25rem;
+}
+
+.help-faq-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.help-faq-list section {
+  background: #f7f9fc;
+  border: 1px solid #e0e7f0;
+  border-radius: var(--market-radius);
+  padding: 0.95rem;
+}
+
+.help-faq-list h3 {
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.help-faq-list p {
+  color: var(--market-ink-soft);
+  margin: 0;
+}
+
 .auth-nav {
   align-items: center;
   gap: 0.35rem;
