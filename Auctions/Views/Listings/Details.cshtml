@@ -8,6 +8,17 @@
     var currentUserId = userManager.GetUserId(User);
     var bids = Model.Bids ?? Enumerable.Empty<Bid>();
     var comments = Model.Comments ?? Enumerable.Empty<Comment>();
+    var isSeller = isAuthenticated && currentUserId == Model.IdentityUserId;
+    var isWinner = isAuthenticated && currentUserId == Model.WinnerUserId;
+    var isClosed = Model.Status == AuctionStatus.Closed;
+    var canViewSellerContact = isSeller || (isClosed && isWinner);
+    var sellerEmail = Model.User?.Email ?? "Not available";
+    var sellerPhone = string.IsNullOrWhiteSpace(Model.ContactPhoneNumber) ? "Not available" : Model.ContactPhoneNumber;
+    var finalPrice = Model.CurrentPrice;
+    var listedByText = isSeller ? sellerEmail : "Private seller";
+    var winnerDisplayText = isSeller && Model.WinnerUserId != null
+        ? (Model.Winner?.Email ?? "Winner selected")
+        : (Model.WinnerUserId == null ? "No winner" : "Winner selected");
 }
 
 @functions {
@@ -72,11 +83,11 @@
         }
         else if (currentUserId == Model.IdentityUserId)
         {
-            <span>@Model.Winner?.UserName is the winner.</span>
+            <span>@(Model.Winner?.Email ?? "The winning bidder") is the winner.</span>
         }
         else
         {
-            <span>Bidding is closed. Winner: @Model.Winner?.UserName</span>
+            <span>Bidding is closed. Winner details are private.</span>
         }
     </div>
 }
@@ -115,18 +126,23 @@
                 </div>
                 <div>
                     <dt>Listed by</dt>
-                    <dd>@(Model.User?.UserName ?? "Auction user")</dd>
+                    <dd>@listedByText</dd>
                 </div>
                 @if(Model.Status == AuctionStatus.Closed)
                 {
                     <div>
                         <dt>Winner</dt>
-                        <dd>@(Model.Winner?.UserName ?? "No winner")</dd>
+                        <dd>@winnerDisplayText</dd>
                     </div>
                 }
             </dl>
 
             <div asp-validation-summary="All" class="validation-summary text-danger"></div>
+            <div id="auction-extension-message"
+                 class="alert alert-info py-2 @(ViewData["AuctionExtended"] as bool? == true ? "" : "d-none")"
+                 role="status">
+                Auction extended by 5 minutes due to a last-minute bid.
+            </div>
             @if(isAuthenticated)
             {
                 @if(Model.Status == AuctionStatus.Active)
@@ -177,7 +193,78 @@
             }
         </section>
 
-        @if(isAuthenticated && currentUserId == Model.IdentityUserId)
+        <section class="surface-panel seller-contact-panel">
+            <h2>Seller Contact</h2>
+            @if(canViewSellerContact)
+            {
+                <dl class="detail-facts">
+                    <div>
+                        <dt>Email</dt>
+                        <dd>@sellerEmail</dd>
+                    </div>
+                    <div>
+                        <dt>Phone</dt>
+                        <dd>@sellerPhone</dd>
+                    </div>
+                </dl>
+            }
+            else
+            {
+                <p>Seller contact details are visible only to the winner after the auction ends.</p>
+            }
+        </section>
+
+        @if(isSeller && isClosed)
+        {
+            <section class="surface-panel seller-closed-panel">
+                <h2>Closed Auction</h2>
+                @if(Model.WinnerUserId != null)
+                {
+                    <dl class="detail-facts">
+                        <div>
+                            <dt>Winner email</dt>
+                            <dd>@(Model.Winner?.Email ?? "Not available")</dd>
+                        </div>
+                        <div>
+                            <dt>Final price</dt>
+                            <dd>$@finalPrice.ToString("N2")</dd>
+                        </div>
+                    </dl>
+                }
+                else
+                {
+                    <p>Auction ended with no bids.</p>
+                }
+            </section>
+        }
+
+        @if(isWinner && isClosed)
+        {
+            <section class="surface-panel winner-checkout-panel">
+                <h2>Winner Checkout</h2>
+                <dl class="detail-facts">
+                    <div>
+                        <dt>Seller email</dt>
+                        <dd>@sellerEmail</dd>
+                    </div>
+                    <div>
+                        <dt>Seller phone</dt>
+                        <dd>@sellerPhone</dd>
+                    </div>
+                    <div>
+                        <dt>Final price</dt>
+                        <dd>$@finalPrice.ToString("N2")</dd>
+                    </div>
+                </dl>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-primary js-payment-option" data-payment-message="Cash payment selected. Please contact the seller using the provided email or phone number and arrange pickup/payment.">Cash</button>
+                    <button type="button" class="btn btn-outline-secondary js-payment-option" data-payment-message="Card payment is currently under development.">Card</button>
+                </div>
+                <p id="payment-choice-message" class="mt-3 mb-0" aria-live="polite"></p>
+            </section>
+        }
+
+        @if(isSeller)
         {
             <section class="surface-panel bid-history">
                 <h2>Bid History</h2>
@@ -211,9 +298,20 @@
             const bidCount = document.getElementById("bid-count");
             const bidInput = document.getElementById("bid-price-input");
             const latestBid = document.getElementById("latest-bid");
+            const countdown = document.querySelector(".detail-countdown");
+            const extensionMessage = document.getElementById("auction-extension-message");
+            const paymentMessage = document.getElementById("payment-choice-message");
             const currency = new Intl.NumberFormat(undefined, {
                 style: "currency",
                 currency: "USD"
+            });
+
+            document.querySelectorAll(".js-payment-option").forEach((button) => {
+                button.addEventListener("click", () => {
+                    if (paymentMessage) {
+                        paymentMessage.textContent = button.dataset.paymentMessage || "";
+                    }
+                });
             });
 
             const connection = new signalR.HubConnectionBuilder()
@@ -230,6 +328,17 @@
                 if (bidInput) {
                     bidInput.min = (bid.newCurrentPrice + 1).toString();
                     bidInput.placeholder = bid.newCurrentPrice.toFixed(2);
+                }
+
+                if (bid.auctionExtended && bid.updatedEndTime && countdown) {
+                    countdown.dataset.endTime = bid.updatedEndTime;
+                    countdown.dataset.status = "Active";
+                    countdown.classList.remove("countdown-closed");
+
+                    if (extensionMessage) {
+                        extensionMessage.classList.remove("d-none");
+                        extensionMessage.textContent = "Auction extended by 5 minutes due to a last-minute bid.";
+                    }
                 }
 
                 const bidTime = new Date(bid.bidTime).toLocaleString();

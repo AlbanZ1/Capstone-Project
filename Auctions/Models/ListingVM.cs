@@ -23,6 +23,11 @@ namespace Auctions.Models
         [Display(Name = "End Time")]
         public DateTime EndTime { get; set; } = DateTime.Now.AddDays(7);
 
+        [Required]
+        [Phone]
+        [Display(Name = "Contact Phone Number")]
+        public string ContactPhoneNumber { get; set; } = string.Empty;
+
         public IFormFile Image { get; set; }
         public bool IsSold { get; set; } = false;
 

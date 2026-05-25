@@ -26,6 +26,7 @@ namespace Auctions.Controllers
         private readonly IEmailService _emailService;
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<AuctionHub> _auctionHubContext;
+        private static readonly TimeSpan AntiSnipingWindow = TimeSpan.FromMinutes(5);
 
         public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, IEmailService emailService, ApplicationDbContext context, IHubContext<AuctionHub> auctionHubContext)
         {
@@ -115,6 +116,7 @@ namespace Auctions.Controllers
         }
 
         // GET: Listings/Create
+        [Authorize]
         public async Task<IActionResult> Create()
         {
             await PopulateCategorySelectList();
@@ -129,9 +131,19 @@ namespace Auctions.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ListingVM listing)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            listing.IdentityUserId = userId;
+            ModelState.Remove(nameof(listing.IdentityUserId));
+
             if (ModelState.IsValid && listing.Image != null)
             {
                 if (listing.EndTime <= listing.StartTime)
@@ -155,7 +167,8 @@ namespace Auctions.Controllers
                     StartTime = listing.StartTime,
                     EndTime = listing.EndTime,
                     Status = status,
-                    IdentityUserId = listing.IdentityUserId,
+                    IdentityUserId = userId,
+                    ContactPhoneNumber = listing.ContactPhoneNumber,
                     ImagePath = imagePath,
                     CategoryId = listing.CategoryId,
                 };
@@ -273,6 +286,20 @@ namespace Auctions.Controllers
                 CreatedAt = now
             };
 
+            var auctionExtended = false;
+            DateTime? updatedEndTime = null;
+            if (listing.Status == AuctionStatus.Active
+                && !listing.IsSold
+                && now >= listing.StartTime
+                && now < listing.EndTime
+                && listing.EndTime - now <= AntiSnipingWindow)
+            {
+                listing.EndTime = now.Add(AntiSnipingWindow);
+                auctionExtended = true;
+                updatedEndTime = listing.EndTime;
+                ViewData["AuctionExtended"] = true;
+            }
+
             listing.Price = price;
             listing.CurrentPrice = price;
 
@@ -283,7 +310,9 @@ namespace Auctions.Controllers
                 bid.Price,
                 User.Identity?.Name ?? "Auction user",
                 await _context.Bids.CountAsync(b => b.ListingId == listing.Id),
-                bid.CreatedAt);
+                bid.CreatedAt,
+                updatedEndTime,
+                auctionExtended);
 
             await _auctionHubContext.Clients
                 .Group(AuctionHub.ListingGroupName(listing.Id))

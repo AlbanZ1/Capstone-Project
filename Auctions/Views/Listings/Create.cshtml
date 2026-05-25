@@ -56,6 +56,12 @@
                     <span asp-validation-for="EndTime" class="text-danger"></span>
                 </div>
             </div>
+            <div class="form-field">
+                <label asp-for="ContactPhoneNumber" class="form-label"></label>
+                <input asp-for="ContactPhoneNumber" class="form-control" autocomplete="tel" />
+                <small class="form-text">Visible only to you, and to the winner after the auction closes.</small>
+                <span asp-validation-for="ContactPhoneNumber" class="text-danger"></span>
+            </div>
             <div class="form-field image-upload">
                 <label asp-for="Image" class="form-label"></label>
                 <div class="upload-control">
