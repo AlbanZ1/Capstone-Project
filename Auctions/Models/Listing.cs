@@ -12,6 +12,7 @@ namespace Auctions.Models
         public double Price { get; set; }
         public double StartingPrice { get; set; }
         public double CurrentPrice { get; set; }
+        public double MinimumBidIncrement { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public AuctionStatus Status { get; set; }

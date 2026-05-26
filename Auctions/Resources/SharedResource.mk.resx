@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Auctions" xml:space="preserve"><value>Аукции</value></data>
+  <data name="Active Listings" xml:space="preserve"><value>Активни огласи</value></data>
+  <data name="Create Listing" xml:space="preserve"><value>Креирај оглас</value></data>
+  <data name="My Listings" xml:space="preserve"><value>Мои огласи</value></data>
+  <data name="My Bids" xml:space="preserve"><value>Мои понуди</value></data>
+  <data name="How it works" xml:space="preserve"><value>Како функционира</value></data>
+  <data name="Login" xml:space="preserve"><value>Најава</value></data>
+  <data name="Log in" xml:space="preserve"><value>Најави се</value></data>
+  <data name="Register" xml:space="preserve"><value>Регистрација</value></data>
+  <data name="Logout" xml:space="preserve"><value>Одјави се</value></data>
+  <data name="Active" xml:space="preserve"><value>Активна</value></data>
+  <data name="Pending" xml:space="preserve"><value>Во очекување</value></data>
+  <data name="Closed" xml:space="preserve"><value>Затворена</value></data>
+  <data name="Starts in" xml:space="preserve"><value>Почнува за</value></data>
+  <data name="Current price" xml:space="preserve"><value>Тековна цена</value></data>
+  <data name="Starting price" xml:space="preserve"><value>Почетна цена</value></data>
+  <data name="Minimum bid increment" xml:space="preserve"><value>Минимално зголемување</value></data>
+  <data name="Minimum next bid" xml:space="preserve"><value>Минимална следна понуда</value></data>
+  <data name="Time remaining" xml:space="preserve"><value>Преостанато време</value></data>
+  <data name="Listed by" xml:space="preserve"><value>Огласено од</value></data>
+  <data name="Private seller" xml:space="preserve"><value>Приватен продавач</value></data>
+  <data name="Winner" xml:space="preserve"><value>Победник</value></data>
+  <data name="Place Bid" xml:space="preserve"><value>Постави понуда</value></data>
+  <data name="Your bid" xml:space="preserve"><value>Вашата понуда</value></data>
+  <data name="Sign in to Bid" xml:space="preserve"><value>Најавете се за понуда</value></data>
+  <data name="View Details" xml:space="preserve"><value>Види детали</value></data>
+  <data name="Bids submitted" xml:space="preserve"><value>Поднесени понуди</value></data>
+  <data name="Live bid updates appear here." xml:space="preserve"><value>Тука се прикажуваат ажурирања на понудите во живо.</value></data>
+  <data name="Close Bidding" xml:space="preserve"><value>Затвори наддавање</value></data>
+  <data name="Seller Contact" xml:space="preserve"><value>Контакт со продавач</value></data>
+  <data name="Seller contact details are visible only to the winner after the auction ends." xml:space="preserve"><value>Контакт податоците на продавачот се видливи само за победникот по завршување на аукцијата.</value></data>
+  <data name="Winner Checkout" xml:space="preserve"><value>Наплата за победник</value></data>
+  <data name="Seller email" xml:space="preserve"><value>Е-пошта на продавач</value></data>
+  <data name="Seller phone" xml:space="preserve"><value>Телефон на продавач</value></data>
+  <data name="Final price" xml:space="preserve"><value>Крајна цена</value></data>
+  <data name="Cash" xml:space="preserve"><value>Готовина</value></data>
+  <data name="Card" xml:space="preserve"><value>Картичка</value></data>
+  <data name="Cash payment selected. Please contact the seller using the provided email or phone number and arrange pickup/payment." xml:space="preserve"><value>Избрано е плаќање во готовина. Контактирајте го продавачот преку дадената е-пошта или телефон за подигнување и плаќање.</value></data>
+  <data name="Card payment is currently under development." xml:space="preserve"><value>Плаќањето со картичка моментално е во развој.</value></data>
+  <data name="Auction extended by 5 minutes due to a last-minute bid." xml:space="preserve"><value>Аукцијата е продолжена за 5 минути поради понуда во последен момент.</value></data>
+  <data name="Your bid must be at least {0}." xml:space="preserve"><value>Вашата понуда мора да биде најмалку {0}.</value></data>
+  <data name="Starting price must be greater than 0." xml:space="preserve"><value>Почетната цена мора да биде поголема од 0.</value></data>
+  <data name="Minimum bid increment must be greater than 0." xml:space="preserve"><value>Минималното зголемување мора да биде поголемо од 0.</value></data>
+  <data name="End time must be after start time." xml:space="preserve"><value>Времето на завршување мора да биде по времето на почеток.</value></data>
+  <data name="You cannot bid on your own listing." xml:space="preserve"><value>Не можете да наддавате на сопствен оглас.</value></data>
+  <data name="This auction is closed and no longer accepts bids." xml:space="preserve"><value>Оваа аукција е затворена и повеќе не прима понуди.</value></data>
+  <data name="Bidding starts on {0}." xml:space="preserve"><value>Наддавањето започнува на {0}.</value></data>
+  <data name="This auction has ended and no longer accepts bids." xml:space="preserve"><value>Оваа аукција заврши и повеќе не прима понуди.</value></data>
+  <data name="Auction guide" xml:space="preserve"><value>Водич за аукција</value></data>
+  <data name="How can I participate in an auction?" xml:space="preserve"><value>Како можам да учествувам во аукција?</value></data>
+  <data name="Sign in, open an active listing, review the item details, then place a bid before the timer ends." xml:space="preserve"><value>Најавете се, отворете активен оглас, прегледајте ги деталите и поставете понуда пред да истече времето.</value></data>
+  <data name="How do I place a bid?" xml:space="preserve"><value>Како поставувам понуда?</value></data>
+  <data name="Enter an amount that meets the minimum next bid and submit it from the listing details page." xml:space="preserve"><value>Внесете износ што ја исполнува минималната следна понуда и поднесете го од страницата со детали.</value></data>
+  <data name="How do I win an auction?" xml:space="preserve"><value>Како победувам на аукција?</value></data>
+  <data name="You win if your bid is the highest valid bid when the auction closes." xml:space="preserve"><value>Победувате ако вашата понуда е највисоката валидна понуда кога аукцијата ќе се затвори.</value></data>
+  <data name="Why does the timer extend by 5 minutes?" xml:space="preserve"><value>Зошто тајмерот се продолжува за 5 минути?</value></data>
+  <data name="If someone bids in the last 5 minutes, the auction is extended by 5 minutes so everyone has a fair chance." xml:space="preserve"><value>Ако некој понуди во последните 5 минути, аукцијата се продолжува за 5 минути за сите да имаат фер шанса.</value></data>
+  <data name="When can I see the seller's email and phone number?" xml:space="preserve"><value>Кога можам да ја видам е-поштата и телефонот на продавачот?</value></data>
+  <data name="What happens after I win?" xml:space="preserve"><value>Што се случува откако ќе победам?</value></data>
+  <data name="The checkout panel appears on the closed listing with the final price and seller contact details." xml:space="preserve"><value>Панелот за наплата се појавува на затворениот оглас со крајната цена и контакт податоците на продавачот.</value></data>
+  <data name="How does Cash payment work?" xml:space="preserve"><value>Како функционира плаќањето во готовина?</value></data>
+  <data name="Select Cash, then contact the seller to arrange payment and pickup using the details shown to you." xml:space="preserve"><value>Изберете Готовина, потоа контактирајте го продавачот за плаќање и подигнување преку прикажаните податоци.</value></data>
+  <data name="Why is Card payment marked as under development?" xml:space="preserve"><value>Зошто плаќањето со картичка е означено како во развој?</value></data>
+  <data name="Card payment is not active yet, so completed auctions should use the available Cash option for now." xml:space="preserve"><value>Плаќањето со картичка сè уште не е активно, па завршените аукции засега треба да ја користат опцијата Готовина.</value></data>
+  <data name="Browse Active Listings" xml:space="preserve"><value>Прегледај активни огласи</value></data>
+  <data name="Browse Categories" xml:space="preserve"><value>Прегледај категории</value></data>
+  <data name="All listings" xml:space="preserve"><value>Сите огласи</value></data>
+  <data name="Search listings" xml:space="preserve"><value>Пребарај огласи</value></data>
+  <data name="Search by title" xml:space="preserve"><value>Пребарај по наслов</value></data>
+  <data name="Category" xml:space="preserve"><value>Категорија</value></data>
+  <data name="All categories" xml:space="preserve"><value>Сите категории</value></data>
+  <data name="Filter" xml:space="preserve"><value>Филтрирај</value></data>
+  <data name="Clear" xml:space="preserve"><value>Исчисти</value></data>
+  <data name="Previous" xml:space="preserve"><value>Претходна</value></data>
+  <data name="Next" xml:space="preserve"><value>Следна</value></data>
+  <data name="Page {0} of {1}" xml:space="preserve"><value>Страница {0} од {1}</value></data>
+  <data name="Description" xml:space="preserve"><value>Опис</value></data>
+  <data name="Email" xml:space="preserve"><value>Е-пошта</value></data>
+  <data name="Phone" xml:space="preserve"><value>Телефон</value></data>
+  <data name="Password" xml:space="preserve"><value>Лозинка</value></data>
+  <data name="Remember me?" xml:space="preserve"><value>Запомни ме?</value></data>
+  <data name="Invalid login attempt." xml:space="preserve"><value>Неуспешен обид за најава.</value></data>
+  <data name="New auction" xml:space="preserve"><value>Нова аукција</value></data>
+  <data name="Set the core lot details, choose its auction window, and add a clear image for bidders." xml:space="preserve"><value>Внесете ги главните детали, изберете временски период и додадете јасна слика за понудувачите.</value></data>
+  <data name="Use a title bidders can scan quickly." xml:space="preserve"><value>Користете наслов што понудувачите брзо ќе го разберат.</value></data>
+  <data name="Describe condition, included items, and details that affect bidding." xml:space="preserve"><value>Опишете ја состојбата, вклучените предмети и деталите што влијаат на наддавањето.</value></data>
+  <data name="Select a category" xml:space="preserve"><value>Изберете категорија</value></data>
+  <data name="Visible only to you, and to the winner after the auction closes." xml:space="preserve"><value>Видливо само за вас и за победникот по затворање на аукцијата.</value></data>
+  <data name="Upload a clear listing image." xml:space="preserve"><value>Прикачете јасна слика за огласот.</value></data>
+  <data name="Back to Listings" xml:space="preserve"><value>Назад кон огласите</value></data>
+  <data name="Listing checklist" xml:space="preserve"><value>Проверка за оглас</value></data>
+  <data name="Accurate category" xml:space="preserve"><value>Точна категорија</value></data>
+  <data name="Clear auction timing" xml:space="preserve"><value>Јасно време на аукција</value></data>
+  <data name="Photo that shows the lot" xml:space="preserve"><value>Фотографија што го прикажува предметот</value></data>
+  <data name="Seller dashboard" xml:space="preserve"><value>Панел на продавач</value></data>
+  <data name="Live marketplace" xml:space="preserve"><value>Пазар во живо</value></data>
+  <data name="Active Auctions" xml:space="preserve"><value>Активни аукции</value></data>
+  <data name="Review your lots and keep track of their auction status." xml:space="preserve"><value>Прегледајте ги вашите предмети и следете го статусот на аукцијата.</value></data>
+  <data name="Search current lots, compare bids, and follow auctions while they are open." xml:space="preserve"><value>Пребарувајте тековни предмети, споредувајте понуди и следете аукции додека се отворени.</value></data>
+  <data name="Auction listings" xml:space="preserve"><value>Аукциски огласи</value></data>
+  <data name="bids" xml:space="preserve"><value>понуди</value></data>
+  <data name="No listings found" xml:space="preserve"><value>Не се пронајдени огласи</value></data>
+  <data name="No active listings found" xml:space="preserve"><value>Не се пронајдени активни огласи</value></data>
+  <data name="Try a broader search or clear the current category filter." xml:space="preserve"><value>Обидете се со пошироко пребарување или исчистете го тековниот филтер.</value></data>
+  <data name="Auction Marketplace" xml:space="preserve"><value>Пазар за аукции</value></data>
+  <data name="Live auction marketplace" xml:space="preserve"><value>Пазар за аукции во живо</value></data>
+  <data name="Discover listings worth bidding on." xml:space="preserve"><value>Откријте огласи вредни за наддавање.</value></data>
+  <data name="Browse active auctions by category, watch live price changes, and open each lot for the full details before bidding." xml:space="preserve"><value>Прегледувајте активни аукции по категорија, следете промени на цената во живо и отворете го секој предмет за детали пред наддавање.</value></data>
+  <data name="Featured categories" xml:space="preserve"><value>Истакнати категории</value></data>
+  <data name="Electronics" xml:space="preserve"><value>Електроника</value></data>
+  <data name="Vehicles" xml:space="preserve"><value>Возила</value></data>
+  <data name="Furniture" xml:space="preserve"><value>Мебел</value></data>
+  <data name="Clothing" xml:space="preserve"><value>Облека</value></data>
+  <data name="Books" xml:space="preserve"><value>Книги</value></data>
+  <data name="Other" xml:space="preserve"><value>Друго</value></data>
+  <data name="Open auction help guide" xml:space="preserve"><value>Отвори водич за аукција</value></data>
+  <data name="Close" xml:space="preserve"><value>Затвори</value></data>
+  <data name="Bid live on curated marketplace listings." xml:space="preserve"><value>Наддавајте во живо на избрани огласи.</value></data>
+  <data name="Bidding is closed with no winner." xml:space="preserve"><value>Наддавањето е затворено без победник.</value></data>
+  <data name="Congratulations, you are the winner." xml:space="preserve"><value>Честитки, вие сте победникот.</value></data>
+  <data name="{0} is the winner." xml:space="preserve"><value>{0} е победникот.</value></data>
+  <data name="The winning bidder" xml:space="preserve"><value>Победничкиот понудувач</value></data>
+  <data name="Bidding is closed. Winner details are private." xml:space="preserve"><value>Наддавањето е затворено. Деталите за победникот се приватни.</value></data>
+  <data name="Closed Auction" xml:space="preserve"><value>Затворена аукција</value></data>
+  <data name="Winner email" xml:space="preserve"><value>Е-пошта на победник</value></data>
+  <data name="Auction ended with no bids." xml:space="preserve"><value>Аукцијата заврши без понуди.</value></data>
+  <data name="Bid History" xml:space="preserve"><value>Историја на понуди</value></data>
+  <data name="No bids submitted yet." xml:space="preserve"><value>Сè уште нема поднесени понуди.</value></data>
+  <data name="Add Comment" xml:space="preserve"><value>Додај коментар</value></data>
+  <data name="Message" xml:space="preserve"><value>Порака</value></data>
+  <data name="Comment message" xml:space="preserve"><value>Порака за коментар</value></data>
+  <data name="Post Comment" xml:space="preserve"><value>Објави коментар</value></data>
+  <data name="Sign in to Comment" xml:space="preserve"><value>Најавете се за коментар</value></data>
+  <data name="Comments" xml:space="preserve"><value>Коментари</value></data>
+  <data name="Auction user" xml:space="preserve"><value>Корисник на аукција</value></data>
+  <data name="No comments yet." xml:space="preserve"><value>Сè уште нема коментари.</value></data>
+  <data name="Latest bid:" xml:space="preserve"><value>Најнова понуда:</value></data>
+  <data name="bid" xml:space="preserve"><value>понуди</value></data>
+  <data name="at" xml:space="preserve"><value>во</value></data>
+  <data name="Title" xml:space="preserve"><value>Наслов</value></data>
+  <data name="Start Time" xml:space="preserve"><value>Време на почеток</value></data>
+  <data name="End Time" xml:space="preserve"><value>Време на завршување</value></data>
+  <data name="Contact Phone Number" xml:space="preserve"><value>Контакт телефон</value></data>
+  <data name="Image" xml:space="preserve"><value>Слика</value></data>
+</root>

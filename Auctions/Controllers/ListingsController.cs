@@ -12,6 +12,7 @@ using Auctions.Hubs;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Localization;
 
 namespace Auctions.Controllers
 {
@@ -26,9 +27,10 @@ namespace Auctions.Controllers
         private readonly IEmailService _emailService;
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<AuctionHub> _auctionHubContext;
+        private readonly IStringLocalizer<SharedResource> _localizer;
         private static readonly TimeSpan AntiSnipingWindow = TimeSpan.FromMinutes(5);
 
-        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, IEmailService emailService, ApplicationDbContext context, IHubContext<AuctionHub> auctionHubContext)
+        public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, IEmailService emailService, ApplicationDbContext context, IHubContext<AuctionHub> auctionHubContext, IStringLocalizer<SharedResource> localizer)
         {
             _listingsService = listingsService;
             _bidsService = bidsService;
@@ -37,6 +39,7 @@ namespace Auctions.Controllers
             _emailService = emailService;
             _context = context;
             _auctionHubContext = auctionHubContext;
+            _localizer = localizer;
         }
 
         // GET: Listings
@@ -146,9 +149,23 @@ namespace Auctions.Controllers
 
             if (ModelState.IsValid && listing.Image != null)
             {
+                if (listing.StartingPrice <= 0)
+                {
+                    ModelState.AddModelError(nameof(listing.StartingPrice), _localizer["Starting price must be greater than 0."]);
+                }
+
+                if (listing.MinimumBidIncrement <= 0)
+                {
+                    ModelState.AddModelError(nameof(listing.MinimumBidIncrement), _localizer["Minimum bid increment must be greater than 0."]);
+                }
+
                 if (listing.EndTime <= listing.StartTime)
                 {
-                    ModelState.AddModelError(nameof(listing.EndTime), "End time must be after start time.");
+                    ModelState.AddModelError(nameof(listing.EndTime), _localizer["End time must be after start time."]);
+                }
+
+                if (!ModelState.IsValid)
+                {
                     await PopulateCategorySelectList(listing.CategoryId);
                     return View(listing);
                 }
@@ -164,6 +181,7 @@ namespace Auctions.Controllers
                     Price = startingPrice,
                     StartingPrice = startingPrice,
                     CurrentPrice = startingPrice,
+                    MinimumBidIncrement = listing.MinimumBidIncrement,
                     StartTime = listing.StartTime,
                     EndTime = listing.EndTime,
                     Status = status,
@@ -243,27 +261,28 @@ namespace Auctions.Controllers
 
             if (listing.IdentityUserId == userId)
             {
-                ModelState.AddModelError(nameof(price), "You cannot bid on your own listing.");
+                ModelState.AddModelError(nameof(price), _localizer["You cannot bid on your own listing."]);
             }
 
             if (listing.Status == AuctionStatus.Closed || listing.IsSold)
             {
-                ModelState.AddModelError(nameof(price), "This auction is closed and no longer accepts bids.");
+                ModelState.AddModelError(nameof(price), _localizer["This auction is closed and no longer accepts bids."]);
             }
 
             if (now < listing.StartTime)
             {
-                ModelState.AddModelError(nameof(price), $"Bidding starts on {listing.StartTime:g}.");
+                ModelState.AddModelError(nameof(price), string.Format(_localizer["Bidding starts on {0}."], listing.StartTime.ToString("g")));
             }
 
             if (now > listing.EndTime)
             {
-                ModelState.AddModelError(nameof(price), "This auction has ended and no longer accepts bids.");
+                ModelState.AddModelError(nameof(price), _localizer["This auction has ended and no longer accepts bids."]);
             }
 
-            if (price <= listing.CurrentPrice)
+            var minimumNextBid = listing.CurrentPrice + listing.MinimumBidIncrement;
+            if (price < minimumNextBid)
             {
-                ModelState.AddModelError(nameof(price), $"Your bid must be greater than the current price of ${listing.CurrentPrice:N2}.");
+                ModelState.AddModelError(nameof(price), string.Format(_localizer["Your bid must be at least {0}."], $"${minimumNextBid:N2}"));
             }
 
             if (!ModelState.IsValid)
@@ -307,6 +326,7 @@ namespace Auctions.Controllers
 
             var bidUpdate = new AuctionBidUpdate(
                 listing.CurrentPrice,
+                listing.CurrentPrice + listing.MinimumBidIncrement,
                 bid.Price,
                 User.Identity?.Name ?? "Auction user",
                 await _context.Bids.CountAsync(b => b.ListingId == listing.Id),

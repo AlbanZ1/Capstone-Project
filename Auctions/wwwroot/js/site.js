@@ -5,6 +5,9 @@
 
 (() => {
     const countdowns = Array.from(document.querySelectorAll(".js-auction-countdown"));
+    const countdownLabels = document.body?.dataset || {};
+    const closedText = countdownLabels.countdownClosed || "Closed";
+    const startsInText = countdownLabels.countdownStartsIn || "Starts in";
 
     if (!countdowns.length) {
         return;
@@ -38,13 +41,13 @@
         const endTime = parseDate(element.dataset.endTime);
 
         if (status === "closed" || !endTime || now >= endTime) {
-            element.textContent = "Closed";
+            element.textContent = closedText;
             setState(element, "countdown-closed");
             return;
         }
 
         if (status === "pending" && startTime && now < startTime) {
-            element.textContent = `Starts in ${formatDuration(startTime - now)}`;
+            element.textContent = `${startsInText} ${formatDuration(startTime - now)}`;
             setState(element, "countdown-pending");
             return;
         }

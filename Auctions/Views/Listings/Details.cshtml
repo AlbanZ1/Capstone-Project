@@ -1,6 +1,8 @@
 ﻿@model Auctions.Models.Listing
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Localization
 @inject UserManager<IdentityUser> userManager
+@inject IStringLocalizer<Auctions.SharedResource> L
 
 @{
     ViewData["Title"] = Model.Title;
@@ -15,6 +17,7 @@
     var sellerEmail = Model.User?.Email ?? "Not available";
     var sellerPhone = string.IsNullOrWhiteSpace(Model.ContactPhoneNumber) ? "Not available" : Model.ContactPhoneNumber;
     var finalPrice = Model.CurrentPrice;
+    var minimumNextBid = Model.CurrentPrice + Model.MinimumBidIncrement;
     var listedByText = isSeller ? sellerEmail : "Private seller";
     var winnerDisplayText = isSeller && Model.WinnerUserId != null
         ? (Model.Winner?.Email ?? "Winner selected")
@@ -59,13 +62,13 @@
 }
 
 <section class="detail-heading">
-    <a asp-action="Index" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Active listings</a>
+    <a asp-action="Index" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> @L["Active Listings"]</a>
     <div class="detail-title-row">
         <div>
-            <p class="section-kicker">@(Model.Category?.Name ?? "Uncategorized")</p>
+            <p class="section-kicker">@(Model.Category?.Name ?? L["Uncategorized"])</p>
             <h1>@Model.Title</h1>
         </div>
-        <span class="status-badge detail-status @GetStatusClass(Model.Status)">@Model.Status</span>
+        <span class="status-badge detail-status @GetStatusClass(Model.Status)">@L[Model.Status.ToString()]</span>
     </div>
 </section>
 
@@ -75,19 +78,19 @@
         <i class="fa-solid fa-trophy" aria-hidden="true"></i>
         @if(Model.WinnerUserId == null)
         {
-            <span>Bidding is closed with no winner.</span>
+            <span>@L["Bidding is closed with no winner."]</span>
         }
         else if(Model.WinnerUserId == currentUserId)
         {
-            <span>Congratulations, you are the winner.</span>
+            <span>@L["Congratulations, you are the winner."]</span>
         }
         else if (currentUserId == Model.IdentityUserId)
         {
-            <span>@(Model.Winner?.Email ?? "The winning bidder") is the winner.</span>
+            <span>@string.Format(L["{0} is the winner."], Model.Winner?.Email ?? L["The winning bidder"])</span>
         }
         else
         {
-            <span>Bidding is closed. Winner details are private.</span>
+            <span>@L["Bidding is closed. Winner details are private."]</span>
         }
     </div>
 }
@@ -98,7 +101,7 @@
             <img src="@Model.ImagePath" alt="@Model.Title" />
         </div>
         <article class="surface-panel detail-description">
-            <h2>Description</h2>
+            <h2>@L["Description"]</h2>
             <p>@Model.Description</p>
         </article>
     </div>
@@ -106,16 +109,24 @@
     <aside class="detail-sidebar">
         <section class="surface-panel price-panel">
             <div class="price-summary">
-                <span>Current price</span>
+                <span>@L["Current price"]</span>
                 <strong id="current-price">$@Model.CurrentPrice.ToString("N2")</strong>
             </div>
             <dl class="detail-facts">
                 <div>
-                    <dt>Starting price</dt>
+                    <dt>@L["Starting price"]</dt>
                     <dd>$@Model.StartingPrice.ToString("N2")</dd>
                 </div>
                 <div>
-                    <dt>Time remaining</dt>
+                    <dt>@L["Minimum bid increment"]</dt>
+                    <dd>$@Model.MinimumBidIncrement.ToString("N2")</dd>
+                </div>
+                <div>
+                    <dt>@L["Minimum next bid"]</dt>
+                    <dd id="minimum-next-bid">$@minimumNextBid.ToString("N2")</dd>
+                </div>
+                <div>
+                    <dt>@L["Time remaining"]</dt>
                     <dd class="countdown-label detail-countdown js-auction-countdown @(Model.Status == AuctionStatus.Closed ? "countdown-closed" : "")"
                         data-status="@Model.Status"
                         data-start-time="@Model.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")"
@@ -125,13 +136,13 @@
                     </dd>
                 </div>
                 <div>
-                    <dt>Listed by</dt>
-                    <dd>@listedByText</dd>
+                    <dt>@L["Listed by"]</dt>
+                    <dd>@(isSeller ? sellerEmail : L["Private seller"])</dd>
                 </div>
                 @if(Model.Status == AuctionStatus.Closed)
                 {
                     <div>
-                        <dt>Winner</dt>
+                        <dt>@L["Winner"]</dt>
                         <dd>@winnerDisplayText</dd>
                     </div>
                 }
@@ -141,7 +152,7 @@
             <div id="auction-extension-message"
                  class="alert alert-info py-2 @(ViewData["AuctionExtended"] as bool? == true ? "" : "d-none")"
                  role="status">
-                Auction extended by 5 minutes due to a last-minute bid.
+                @L["Auction extended by 5 minutes due to a last-minute bid."]
             </div>
             @if(isAuthenticated)
             {
@@ -149,23 +160,23 @@
                 {
                     <form asp-action="AddBid" method="post" class="bid-form">
                         @Html.AntiForgeryToken()
-                        <label for="bid-price-input" class="form-label">Your bid</label>
+                        <label for="bid-price-input" class="form-label">@L["Your bid"]</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input id="bid-price-input" class="form-control" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
+                            <input id="bid-price-input" class="form-control" type="number" min="@minimumNextBid" step="0.01" name="Price" placeholder="@minimumNextBid.ToString("N2")" />
                             <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
-                            <button type="submit" class="btn btn-primary">Place Bid</button>
+                            <button type="submit" class="btn btn-primary">@L["Place Bid"]</button>
                         </div>
                     </form>
                 }
                 else
                 {
                     <div class="bid-form">
-                        <label for="bid-price-input" class="form-label">Your bid</label>
+                        <label for="bid-price-input" class="form-label">@L["Your bid"]</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input id="bid-price-input" class="form-control" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" disabled />
-                            <button disabled type="submit" class="btn btn-primary">Place Bid</button>
+                            <input id="bid-price-input" class="form-control" type="number" min="@minimumNextBid" step="0.01" name="Price" placeholder="@minimumNextBid.ToString("N2")" disabled />
+                            <button disabled type="submit" class="btn btn-primary">@L["Place Bid"]</button>
                         </div>
                     </div>
                 }
@@ -173,67 +184,67 @@
             else
             {
                 <div class="bid-form">
-                    <label for="bid-price-input" class="form-label">Your bid</label>
+                    <label for="bid-price-input" class="form-label">@L["Your bid"]</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input id="bid-price-input" class="form-control" type="number" min="@(Model.CurrentPrice + 1)" step="1" name="Price" placeholder="@Model.CurrentPrice.ToString("N2")" />
-                        <button disabled type="submit" class="btn btn-primary">Sign in to Bid</button>
+                        <input id="bid-price-input" class="form-control" type="number" min="@minimumNextBid" step="0.01" name="Price" placeholder="@minimumNextBid.ToString("N2")" />
+                        <button disabled type="submit" class="btn btn-primary">@L["Sign in to Bid"]</button>
                     </div>
                 </div>
             }
 
             <div class="live-bid-panel">
-                <p>Bids submitted <strong id="bid-count">@bids.Count()</strong></p>
-                <div id="latest-bid" aria-live="polite">Live bid updates appear here.</div>
+                <p>@L["Bids submitted"] <strong id="bid-count">@bids.Count()</strong></p>
+                <div id="latest-bid" aria-live="polite">@L["Live bid updates appear here."]</div>
             </div>
 
             @if(isAuthenticated && currentUserId == Model.IdentityUserId && Model.Status != AuctionStatus.Closed)
             {
-                <a asp-action="CloseBidding" asp-route-id="@Model.Id" class="btn btn-outline-secondary w-100">Close Bidding</a>
+                <a asp-action="CloseBidding" asp-route-id="@Model.Id" class="btn btn-outline-secondary w-100">@L["Close Bidding"]</a>
             }
         </section>
 
         <section class="surface-panel seller-contact-panel">
-            <h2>Seller Contact</h2>
+            <h2>@L["Seller Contact"]</h2>
             @if(canViewSellerContact)
             {
                 <dl class="detail-facts">
                     <div>
-                        <dt>Email</dt>
+                        <dt>@L["Email"]</dt>
                         <dd>@sellerEmail</dd>
                     </div>
                     <div>
-                        <dt>Phone</dt>
+                        <dt>@L["Phone"]</dt>
                         <dd>@sellerPhone</dd>
                     </div>
                 </dl>
             }
             else
             {
-                <p>Seller contact details are visible only to the winner after the auction ends.</p>
+                <p>@L["Seller contact details are visible only to the winner after the auction ends."]</p>
             }
         </section>
 
         @if(isSeller && isClosed)
         {
             <section class="surface-panel seller-closed-panel">
-                <h2>Closed Auction</h2>
+                <h2>@L["Closed Auction"]</h2>
                 @if(Model.WinnerUserId != null)
                 {
                     <dl class="detail-facts">
                         <div>
-                            <dt>Winner email</dt>
+                            <dt>@L["Winner email"]</dt>
                             <dd>@(Model.Winner?.Email ?? "Not available")</dd>
                         </div>
                         <div>
-                            <dt>Final price</dt>
+                            <dt>@L["Final price"]</dt>
                             <dd>$@finalPrice.ToString("N2")</dd>
                         </div>
                     </dl>
                 }
                 else
                 {
-                    <p>Auction ended with no bids.</p>
+                    <p>@L["Auction ended with no bids."]</p>
                 }
             </section>
         }
@@ -241,24 +252,24 @@
         @if(isWinner && isClosed)
         {
             <section class="surface-panel winner-checkout-panel">
-                <h2>Winner Checkout</h2>
+                <h2>@L["Winner Checkout"]</h2>
                 <dl class="detail-facts">
                     <div>
-                        <dt>Seller email</dt>
+                        <dt>@L["Seller email"]</dt>
                         <dd>@sellerEmail</dd>
                     </div>
                     <div>
-                        <dt>Seller phone</dt>
+                        <dt>@L["Seller phone"]</dt>
                         <dd>@sellerPhone</dd>
                     </div>
                     <div>
-                        <dt>Final price</dt>
+                        <dt>@L["Final price"]</dt>
                         <dd>$@finalPrice.ToString("N2")</dd>
                     </div>
                 </dl>
                 <div class="d-flex gap-2 flex-wrap">
-                    <button type="button" class="btn btn-primary js-payment-option" data-payment-message="Cash payment selected. Please contact the seller using the provided email or phone number and arrange pickup/payment.">Cash</button>
-                    <button type="button" class="btn btn-outline-secondary js-payment-option" data-payment-message="Card payment is currently under development.">Card</button>
+                    <button type="button" class="btn btn-primary js-payment-option" data-payment-message="@L["Cash payment selected. Please contact the seller using the provided email or phone number and arrange pickup/payment."]">@L["Cash"]</button>
+                    <button type="button" class="btn btn-outline-secondary js-payment-option" data-payment-message="@L["Card payment is currently under development."]">@L["Card"]</button>
                 </div>
                 <p id="payment-choice-message" class="mt-3 mb-0" aria-live="polite"></p>
             </section>
@@ -267,14 +278,14 @@
         @if(isSeller)
         {
             <section class="surface-panel bid-history">
-                <h2>Bid History</h2>
+                <h2>@L["Bid History"]</h2>
                 @if(bids.Any())
                 {
                     <ol>
                         @foreach(var bid in bids.OrderByDescending(b => b.Price))
                         {
                             <li>
-                                <span>@(bid.User?.UserName ?? "Auction user")</span>
+                                <span>@(bid.User?.UserName ?? L["Auction user"])</span>
                                 <strong>$@bid.Price.ToString("N2")</strong>
                             </li>
                         }
@@ -282,7 +293,7 @@
                 }
                 else
                 {
-                    <p>No bids submitted yet.</p>
+                    <p>@L["No bids submitted yet."]</p>
                 }
             </section>
         }
@@ -295,6 +306,7 @@
         (() => {
             const listingId = @Model.Id;
             const currentPrice = document.getElementById("current-price");
+            const minimumNextBid = document.getElementById("minimum-next-bid");
             const bidCount = document.getElementById("bid-count");
             const bidInput = document.getElementById("bid-price-input");
             const latestBid = document.getElementById("latest-bid");
@@ -326,8 +338,12 @@
                 bidCount.textContent = bid.bidCount;
 
                 if (bidInput) {
-                    bidInput.min = (bid.newCurrentPrice + 1).toString();
-                    bidInput.placeholder = bid.newCurrentPrice.toFixed(2);
+                    bidInput.min = bid.minimumNextBid.toString();
+                    bidInput.placeholder = bid.minimumNextBid.toFixed(2);
+                }
+
+                if (minimumNextBid) {
+                    minimumNextBid.textContent = currency.format(bid.minimumNextBid);
                 }
 
                 if (bid.auctionExtended && bid.updatedEndTime && countdown) {
@@ -337,12 +353,12 @@
 
                     if (extensionMessage) {
                         extensionMessage.classList.remove("d-none");
-                        extensionMessage.textContent = "Auction extended by 5 minutes due to a last-minute bid.";
+                        extensionMessage.textContent = "@L["Auction extended by 5 minutes due to a last-minute bid."]";
                     }
                 }
 
                 const bidTime = new Date(bid.bidTime).toLocaleString();
-                latestBid.textContent = `Latest bid: ${bid.bidderDisplayName} bid ${currency.format(bid.bidAmount)} at ${bidTime}.`;
+                latestBid.textContent = `@L["Latest bid:"] ${bid.bidderDisplayName} @L["bid"] ${currency.format(bid.bidAmount)} @L["at"] ${bidTime}.`;
             });
 
             connection.onreconnected(() => {
@@ -362,39 +378,39 @@
         {
             <form asp-action="AddComment" method="post" class="comment-form">
                 @Html.AntiForgeryToken()
-                <h2>Add Comment</h2>
-                <label for="comment-content" class="form-label">Message</label>
-                <textarea id="comment-content" class="form-control" aria-label="Comment message" name="Content" rows="4"></textarea>
+                <h2>@L["Add Comment"]</h2>
+                <label for="comment-content" class="form-label">@L["Message"]</label>
+                <textarea id="comment-content" class="form-control" aria-label="@L["Comment message"]" name="Content" rows="4"></textarea>
                 <input type="hidden" name="IdentityUserId" class="form-control" value="@currentUserId" />
                 <input type="hidden" name="ListingId" class="form-control" value="@Model.Id" />
-                <input type="submit" class="btn btn-primary" value="Post Comment" />
+                <input type="submit" class="btn btn-primary" value="@L["Post Comment"]" />
             </form>
         }
         else
         {
             <div class="comment-form">
-                <h2>Add Comment</h2>
-                <label for="comment-content" class="form-label">Message</label>
-                <textarea id="comment-content" class="form-control" aria-label="Comment message" name="Content" rows="4"></textarea>
-                <input type="submit" disabled class="btn btn-primary" value="Sign in to Comment" />
+                <h2>@L["Add Comment"]</h2>
+                <label for="comment-content" class="form-label">@L["Message"]</label>
+                <textarea id="comment-content" class="form-control" aria-label="@L["Comment message"]" name="Content" rows="4"></textarea>
+                <input type="submit" disabled class="btn btn-primary" value="@L["Sign in to Comment"]" />
             </div>
         }
 
         <div class="comment-list">
-            <h2>Comments</h2>
+            <h2>@L["Comments"]</h2>
             @if(comments.Any())
             {
                 @foreach(var comment in comments)
                 {
                     <article class="comment-card">
                         <p>@comment.Content</p>
-                        <span>@(comment.User?.UserName ?? "Auction user")</span>
+                        <span>@(comment.User?.UserName ?? L["Auction user"])</span>
                     </article>
                 }
             }
             else
             {
-                <p>No comments yet.</p>
+                <p>@L["No comments yet."]</p>
             }
         </div>
     </div>

@@ -13,7 +13,13 @@ namespace Auctions.Models
 
         [Required]
         [Display(Name = "Starting Price")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Starting price must be greater than 0.")]
         public double StartingPrice { get; set; }
+
+        [Required]
+        [Display(Name = "Minimum Bid Increment")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Minimum bid increment must be greater than 0.")]
+        public double MinimumBidIncrement { get; set; }
 
         [Required]
         [Display(Name = "Start Time")]

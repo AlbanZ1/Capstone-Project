@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Auctions" xml:space="preserve"><value>Ankandet</value></data>
+  <data name="Active Listings" xml:space="preserve"><value>Listimet aktive</value></data>
+  <data name="Create Listing" xml:space="preserve"><value>Krijo listim</value></data>
+  <data name="My Listings" xml:space="preserve"><value>Listimet e mia</value></data>
+  <data name="My Bids" xml:space="preserve"><value>Ofertat e mia</value></data>
+  <data name="How it works" xml:space="preserve"><value>Si funksionon</value></data>
+  <data name="Login" xml:space="preserve"><value>Hyr</value></data>
+  <data name="Log in" xml:space="preserve"><value>Hyr</value></data>
+  <data name="Register" xml:space="preserve"><value>Regjistrohu</value></data>
+  <data name="Logout" xml:space="preserve"><value>Dil</value></data>
+  <data name="Active" xml:space="preserve"><value>Aktiv</value></data>
+  <data name="Pending" xml:space="preserve"><value>Në pritje</value></data>
+  <data name="Closed" xml:space="preserve"><value>Mbyllur</value></data>
+  <data name="Starts in" xml:space="preserve"><value>Fillon për</value></data>
+  <data name="Current price" xml:space="preserve"><value>Çmimi aktual</value></data>
+  <data name="Starting price" xml:space="preserve"><value>Çmimi fillestar</value></data>
+  <data name="Minimum bid increment" xml:space="preserve"><value>Rritja minimale e ofertës</value></data>
+  <data name="Minimum next bid" xml:space="preserve"><value>Oferta minimale e radhës</value></data>
+  <data name="Time remaining" xml:space="preserve"><value>Koha e mbetur</value></data>
+  <data name="Listed by" xml:space="preserve"><value>Listuar nga</value></data>
+  <data name="Private seller" xml:space="preserve"><value>Shitës privat</value></data>
+  <data name="Winner" xml:space="preserve"><value>Fituesi</value></data>
+  <data name="Place Bid" xml:space="preserve"><value>Vendos ofertë</value></data>
+  <data name="Your bid" xml:space="preserve"><value>Oferta juaj</value></data>
+  <data name="Sign in to Bid" xml:space="preserve"><value>Hyni për të ofertuar</value></data>
+  <data name="View Details" xml:space="preserve"><value>Shiko detajet</value></data>
+  <data name="Bids submitted" xml:space="preserve"><value>Oferta të dorëzuara</value></data>
+  <data name="Live bid updates appear here." xml:space="preserve"><value>Përditësimet live të ofertave shfaqen këtu.</value></data>
+  <data name="Close Bidding" xml:space="preserve"><value>Mbyll ofertimin</value></data>
+  <data name="Seller Contact" xml:space="preserve"><value>Kontakti i shitësit</value></data>
+  <data name="Seller contact details are visible only to the winner after the auction ends." xml:space="preserve"><value>Detajet e kontaktit të shitësit janë të dukshme vetëm për fituesin pas përfundimit të ankandit.</value></data>
+  <data name="Winner Checkout" xml:space="preserve"><value>Pagesa e fituesit</value></data>
+  <data name="Seller email" xml:space="preserve"><value>Emaili i shitësit</value></data>
+  <data name="Seller phone" xml:space="preserve"><value>Telefoni i shitësit</value></data>
+  <data name="Final price" xml:space="preserve"><value>Çmimi final</value></data>
+  <data name="Cash" xml:space="preserve"><value>Para në dorë</value></data>
+  <data name="Card" xml:space="preserve"><value>Kartë</value></data>
+  <data name="Cash payment selected. Please contact the seller using the provided email or phone number and arrange pickup/payment." xml:space="preserve"><value>U zgjodh pagesa me para në dorë. Kontaktoni shitësin me emailin ose numrin e dhënë për të rregulluar marrjen dhe pagesën.</value></data>
+  <data name="Card payment is currently under development." xml:space="preserve"><value>Pagesa me kartë është aktualisht në zhvillim.</value></data>
+  <data name="Auction extended by 5 minutes due to a last-minute bid." xml:space="preserve"><value>Ankandi u zgjat me 5 minuta për shkak të një oferte në minutën e fundit.</value></data>
+  <data name="Your bid must be at least {0}." xml:space="preserve"><value>Oferta juaj duhet të jetë të paktën {0}.</value></data>
+  <data name="Starting price must be greater than 0." xml:space="preserve"><value>Çmimi fillestar duhet të jetë më i madh se 0.</value></data>
+  <data name="Minimum bid increment must be greater than 0." xml:space="preserve"><value>Rritja minimale e ofertës duhet të jetë më e madhe se 0.</value></data>
+  <data name="End time must be after start time." xml:space="preserve"><value>Koha e përfundimit duhet të jetë pas kohës së fillimit.</value></data>
+  <data name="You cannot bid on your own listing." xml:space="preserve"><value>Nuk mund të ofertoni në listimin tuaj.</value></data>
+  <data name="This auction is closed and no longer accepts bids." xml:space="preserve"><value>Ky ankand është i mbyllur dhe nuk pranon më oferta.</value></data>
+  <data name="Bidding starts on {0}." xml:space="preserve"><value>Ofertimi fillon më {0}.</value></data>
+  <data name="This auction has ended and no longer accepts bids." xml:space="preserve"><value>Ky ankand ka përfunduar dhe nuk pranon më oferta.</value></data>
+  <data name="Auction guide" xml:space="preserve"><value>Udhëzues ankandi</value></data>
+  <data name="How can I participate in an auction?" xml:space="preserve"><value>Si mund të marr pjesë në një ankand?</value></data>
+  <data name="Sign in, open an active listing, review the item details, then place a bid before the timer ends." xml:space="preserve"><value>Hyni, hapni një listim aktiv, kontrolloni detajet e artikullit dhe vendosni ofertë para se të mbarojë koha.</value></data>
+  <data name="How do I place a bid?" xml:space="preserve"><value>Si vendos një ofertë?</value></data>
+  <data name="Enter an amount that meets the minimum next bid and submit it from the listing details page." xml:space="preserve"><value>Shkruani një shumë që plotëson ofertën minimale të radhës dhe dorëzojeni nga faqja e detajeve.</value></data>
+  <data name="How do I win an auction?" xml:space="preserve"><value>Si fitoj një ankand?</value></data>
+  <data name="You win if your bid is the highest valid bid when the auction closes." xml:space="preserve"><value>Fitoni nëse oferta juaj është oferta më e lartë e vlefshme kur ankandi mbyllet.</value></data>
+  <data name="Why does the timer extend by 5 minutes?" xml:space="preserve"><value>Pse zgjatet kohëmatësi me 5 minuta?</value></data>
+  <data name="If someone bids in the last 5 minutes, the auction is extended by 5 minutes so everyone has a fair chance." xml:space="preserve"><value>Nëse dikush ofertoi në 5 minutat e fundit, ankandi zgjatet me 5 minuta që të gjithë të kenë mundësi të drejtë.</value></data>
+  <data name="When can I see the seller's email and phone number?" xml:space="preserve"><value>Kur mund ta shoh emailin dhe numrin e telefonit të shitësit?</value></data>
+  <data name="What happens after I win?" xml:space="preserve"><value>Çfarë ndodh pasi fitoj?</value></data>
+  <data name="The checkout panel appears on the closed listing with the final price and seller contact details." xml:space="preserve"><value>Paneli i pagesës shfaqet në listimin e mbyllur me çmimin final dhe kontaktet e shitësit.</value></data>
+  <data name="How does Cash payment work?" xml:space="preserve"><value>Si funksionon pagesa me para në dorë?</value></data>
+  <data name="Select Cash, then contact the seller to arrange payment and pickup using the details shown to you." xml:space="preserve"><value>Zgjidhni Para në dorë, pastaj kontaktoni shitësin për pagesën dhe marrjen me detajet e shfaqura.</value></data>
+  <data name="Why is Card payment marked as under development?" xml:space="preserve"><value>Pse pagesa me kartë është shënuar si në zhvillim?</value></data>
+  <data name="Card payment is not active yet, so completed auctions should use the available Cash option for now." xml:space="preserve"><value>Pagesa me kartë nuk është aktive ende, prandaj ankandet e përfunduara duhet të përdorin për momentin opsionin Para në dorë.</value></data>
+  <data name="Browse Active Listings" xml:space="preserve"><value>Shfleto listimet aktive</value></data>
+  <data name="Browse Categories" xml:space="preserve"><value>Shfleto kategoritë</value></data>
+  <data name="All listings" xml:space="preserve"><value>Të gjitha listimet</value></data>
+  <data name="Search listings" xml:space="preserve"><value>Kërko listime</value></data>
+  <data name="Search by title" xml:space="preserve"><value>Kërko sipas titullit</value></data>
+  <data name="Category" xml:space="preserve"><value>Kategoria</value></data>
+  <data name="All categories" xml:space="preserve"><value>Të gjitha kategoritë</value></data>
+  <data name="Filter" xml:space="preserve"><value>Filtro</value></data>
+  <data name="Clear" xml:space="preserve"><value>Pastro</value></data>
+  <data name="Previous" xml:space="preserve"><value>Para</value></data>
+  <data name="Next" xml:space="preserve"><value>Pas</value></data>
+  <data name="Page {0} of {1}" xml:space="preserve"><value>Faqja {0} nga {1}</value></data>
+  <data name="Description" xml:space="preserve"><value>Përshkrimi</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Phone" xml:space="preserve"><value>Telefon</value></data>
+  <data name="Password" xml:space="preserve"><value>Fjalëkalimi</value></data>
+  <data name="Remember me?" xml:space="preserve"><value>Më mbaj mend?</value></data>
+  <data name="Invalid login attempt." xml:space="preserve"><value>Tentativë e pasuksesshme për hyrje.</value></data>
+  <data name="New auction" xml:space="preserve"><value>Ankand i ri</value></data>
+  <data name="Set the core lot details, choose its auction window, and add a clear image for bidders." xml:space="preserve"><value>Vendosni detajet kryesore, zgjidhni kohën e ankandit dhe shtoni një foto të qartë për ofertuesit.</value></data>
+  <data name="Use a title bidders can scan quickly." xml:space="preserve"><value>Përdorni një titull që ofertuesit ta kuptojnë shpejt.</value></data>
+  <data name="Describe condition, included items, and details that affect bidding." xml:space="preserve"><value>Përshkruani gjendjen, artikujt e përfshirë dhe detajet që ndikojnë në ofertim.</value></data>
+  <data name="Select a category" xml:space="preserve"><value>Zgjidh një kategori</value></data>
+  <data name="Visible only to you, and to the winner after the auction closes." xml:space="preserve"><value>E dukshme vetëm për ju dhe për fituesin pas mbylljes së ankandit.</value></data>
+  <data name="Upload a clear listing image." xml:space="preserve"><value>Ngarkoni një foto të qartë të listimit.</value></data>
+  <data name="Back to Listings" xml:space="preserve"><value>Kthehu te listimet</value></data>
+  <data name="Listing checklist" xml:space="preserve"><value>Lista kontrolluese e listimit</value></data>
+  <data name="Accurate category" xml:space="preserve"><value>Kategori e saktë</value></data>
+  <data name="Clear auction timing" xml:space="preserve"><value>Kohë e qartë e ankandit</value></data>
+  <data name="Photo that shows the lot" xml:space="preserve"><value>Foto që tregon artikullin</value></data>
+  <data name="Seller dashboard" xml:space="preserve"><value>Paneli i shitësit</value></data>
+  <data name="Live marketplace" xml:space="preserve"><value>Treg live</value></data>
+  <data name="Active Auctions" xml:space="preserve"><value>Ankandet aktive</value></data>
+  <data name="Review your lots and keep track of their auction status." xml:space="preserve"><value>Kontrolloni artikujt tuaj dhe ndiqni statusin e ankandit.</value></data>
+  <data name="Search current lots, compare bids, and follow auctions while they are open." xml:space="preserve"><value>Kërkoni artikuj aktualë, krahasoni ofertat dhe ndiqni ankandet derisa janë të hapura.</value></data>
+  <data name="Auction listings" xml:space="preserve"><value>Listime ankandi</value></data>
+  <data name="bids" xml:space="preserve"><value>oferta</value></data>
+  <data name="No listings found" xml:space="preserve"><value>Nuk u gjetën listime</value></data>
+  <data name="No active listings found" xml:space="preserve"><value>Nuk u gjetën listime aktive</value></data>
+  <data name="Try a broader search or clear the current category filter." xml:space="preserve"><value>Provoni një kërkim më të gjerë ose pastroni filtrin aktual të kategorisë.</value></data>
+  <data name="Auction Marketplace" xml:space="preserve"><value>Tregu i ankandeve</value></data>
+  <data name="Live auction marketplace" xml:space="preserve"><value>Treg live i ankandeve</value></data>
+  <data name="Discover listings worth bidding on." xml:space="preserve"><value>Zbuloni listime që ia vlejnë për ofertim.</value></data>
+  <data name="Browse active auctions by category, watch live price changes, and open each lot for the full details before bidding." xml:space="preserve"><value>Shfletoni ankandet aktive sipas kategorisë, ndiqni ndryshimet live të çmimeve dhe hapni çdo artikull për detaje para ofertimit.</value></data>
+  <data name="Featured categories" xml:space="preserve"><value>Kategori të veçuara</value></data>
+  <data name="Electronics" xml:space="preserve"><value>Elektronikë</value></data>
+  <data name="Vehicles" xml:space="preserve"><value>Automjete</value></data>
+  <data name="Furniture" xml:space="preserve"><value>Mobilje</value></data>
+  <data name="Clothing" xml:space="preserve"><value>Veshje</value></data>
+  <data name="Books" xml:space="preserve"><value>Libra</value></data>
+  <data name="Other" xml:space="preserve"><value>Tjetër</value></data>
+  <data name="Open auction help guide" xml:space="preserve"><value>Hap udhëzuesin e ankandit</value></data>
+  <data name="Close" xml:space="preserve"><value>Mbyll</value></data>
+  <data name="Bid live on curated marketplace listings." xml:space="preserve"><value>Ofertoni live në listime të përzgjedhura të tregut.</value></data>
+  <data name="Bidding is closed with no winner." xml:space="preserve"><value>Ofertimi është mbyllur pa fitues.</value></data>
+  <data name="Congratulations, you are the winner." xml:space="preserve"><value>Urime, ju jeni fituesi.</value></data>
+  <data name="{0} is the winner." xml:space="preserve"><value>{0} është fituesi.</value></data>
+  <data name="The winning bidder" xml:space="preserve"><value>Ofertuesi fitues</value></data>
+  <data name="Bidding is closed. Winner details are private." xml:space="preserve"><value>Ofertimi është mbyllur. Detajet e fituesit janë private.</value></data>
+  <data name="Closed Auction" xml:space="preserve"><value>Ankand i mbyllur</value></data>
+  <data name="Winner email" xml:space="preserve"><value>Emaili i fituesit</value></data>
+  <data name="Auction ended with no bids." xml:space="preserve"><value>Ankandi përfundoi pa oferta.</value></data>
+  <data name="Bid History" xml:space="preserve"><value>Historia e ofertave</value></data>
+  <data name="No bids submitted yet." xml:space="preserve"><value>Ende nuk është dorëzuar asnjë ofertë.</value></data>
+  <data name="Add Comment" xml:space="preserve"><value>Shto koment</value></data>
+  <data name="Message" xml:space="preserve"><value>Mesazh</value></data>
+  <data name="Comment message" xml:space="preserve"><value>Mesazhi i komentit</value></data>
+  <data name="Post Comment" xml:space="preserve"><value>Posto koment</value></data>
+  <data name="Sign in to Comment" xml:space="preserve"><value>Hyni për të komentuar</value></data>
+  <data name="Comments" xml:space="preserve"><value>Komentet</value></data>
+  <data name="Auction user" xml:space="preserve"><value>Përdorues ankandi</value></data>
+  <data name="No comments yet." xml:space="preserve"><value>Ende nuk ka komente.</value></data>
+  <data name="Latest bid:" xml:space="preserve"><value>Oferta e fundit:</value></data>
+  <data name="bid" xml:space="preserve"><value>ofertoi</value></data>
+  <data name="at" xml:space="preserve"><value>në</value></data>
+  <data name="Title" xml:space="preserve"><value>Titulli</value></data>
+  <data name="Start Time" xml:space="preserve"><value>Koha e fillimit</value></data>
+  <data name="End Time" xml:space="preserve"><value>Koha e përfundimit</value></data>
+  <data name="Contact Phone Number" xml:space="preserve"><value>Numri i telefonit për kontakt</value></data>
+  <data name="Image" xml:space="preserve"><value>Foto</value></data>
+</root>
