@@ -277,6 +277,29 @@ textarea.form-control {
   gap: 0.35rem;
 }
 
+.language-switcher {
+  align-items: center;
+  display: flex;
+}
+
+.language-toggle,
+.language-option {
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.language-option {
+  display: flex;
+}
+
+.language-flag {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(18, 32, 51, 0.14);
+  height: 0.85rem;
+  object-fit: cover;
+  width: 1.2rem;
+}
+
 .auth-form {
   display: flex;
 }
@@ -1159,6 +1182,15 @@ main > .row:has(#registerForm) {
   .auth-nav {
     align-items: stretch;
     margin-top: 0.4rem;
+  }
+
+  .language-switcher {
+    margin: 0.35rem 0;
+  }
+
+  .language-toggle {
+    justify-content: center;
+    width: 100%;
   }
 
   .auth-nav .btn {

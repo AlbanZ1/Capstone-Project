@@ -1,21 +1,35 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using System.Globalization
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Auctions.SharedResource> L
+@{
+    var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var returnUrl = Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString;
+    var languages = new[]
+    {
+        new { Code = "en", Label = "English", Flag = "/Images/flags/us.svg" },
+        new { Code = "sq", Label = "Shqip", Flag = "/Images/flags/al.svg" },
+        new { Code = "mk", Label = "Македонски", Flag = "/Images/flags/mk.svg" }
+    };
+}
+<!DOCTYPE html>
+<html lang="@currentCulture">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Auctions</title>
+    <title>@ViewData["Title"] - @L["Auctions"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Auctions.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body>
+<body data-countdown-closed="@L["Closed"]" data-countdown-starts-in="@L["Starts in"]">
     <header>
         <nav class="navbar navbar-dark marketplace-navbar navbar-expand-lg">
             <div class="container">
                 <a class="navbar-brand marketplace-brand" asp-area="" asp-controller="Listings" asp-action="Index">
                     <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-gavel"></i></span>
-                    Auctions
+                    @L["Auctions"]
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#marketplaceNav" aria-controls="marketplaceNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -24,27 +38,52 @@
                 <div class="navbar-collapse collapse" id="marketplaceNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="Index"><i class="fa-solid fa-house" aria-hidden="true"></i> Active Listings</a>
+                            <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="Index"><i class="fa-solid fa-house" aria-hidden="true"></i> @L["Active Listings"]</a>
                         </li>
                         @if(User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="Create"><i class="fa-solid fa-plus" aria-hidden="true"></i> Create Listing</a>
+                                <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="Create"><i class="fa-solid fa-plus" aria-hidden="true"></i> @L["Create Listing"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="MyListings"><i class="fa-solid fa-newspaper" aria-hidden="true"></i> My Listings</a>
+                                <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="MyListings"><i class="fa-solid fa-newspaper" aria-hidden="true"></i> @L["My Listings"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="MyBids"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i> My Bids</a>
+                                <a class="nav-link" asp-area="" asp-controller="Listings" asp-action="MyBids"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i> @L["My Bids"]</a>
                             </li>
                         }
                         <li class="nav-item">
-                            <button type="button" class="nav-link help-nav-button" data-bs-toggle="modal" data-bs-target="#howItWorksModal" aria-label="Open auction help guide">
+                            <button type="button" class="nav-link help-nav-button" data-bs-toggle="modal" data-bs-target="#howItWorksModal" aria-label="@L["Open auction help guide"]">
                                 <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
-                                <span class="help-nav-text">How it works</span>
+                                <span class="help-nav-text">@L["How it works"]</span>
                             </button>
                         </li>
                     </ul>
+                    <div class="language-switcher dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle language-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @{
+                                var selectedLanguage = languages.FirstOrDefault(language => language.Code == currentCulture) ?? languages[0];
+                            }
+                            <img src="@selectedLanguage.Flag" alt="" class="language-flag" />
+                            <span>@selectedLanguage.Label</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @foreach(var language in languages)
+                            {
+                                <li>
+                                    <form asp-controller="Home" asp-action="SetCulture" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="culture" value="@language.Code" />
+                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                        <button type="submit" class="dropdown-item language-option @(currentCulture == language.Code ? "active" : "")">
+                                            <img src="@language.Flag" alt="" class="language-flag" />
+                                            <span>@language.Label</span>
+                                        </button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
@@ -61,44 +100,44 @@
             <div class="modal-content help-modal">
                 <div class="modal-header">
                     <div>
-                        <p class="section-kicker">Auction guide</p>
-                        <h2 class="modal-title" id="howItWorksModalLabel">How it works</h2>
+                        <p class="section-kicker">@L["Auction guide"]</p>
+                        <h2 class="modal-title" id="howItWorksModalLabel">@L["How it works"]</h2>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Close"]"></button>
                 </div>
                 <div class="modal-body">
                     <div class="help-faq-list">
                         <section>
-                            <h3>How can I participate in an auction?</h3>
-                            <p>Sign in, open an active listing, review the item details, then place a bid before the timer ends.</p>
+                            <h3>@L["How can I participate in an auction?"]</h3>
+                            <p>@L["Sign in, open an active listing, review the item details, then place a bid before the timer ends."]</p>
                         </section>
                         <section>
-                            <h3>How do I place a bid?</h3>
-                            <p>Enter an amount higher than the current price and submit it from the listing details page.</p>
+                            <h3>@L["How do I place a bid?"]</h3>
+                            <p>@L["Enter an amount that meets the minimum next bid and submit it from the listing details page."]</p>
                         </section>
                         <section>
-                            <h3>How do I win an auction?</h3>
-                            <p>You win if your bid is the highest valid bid when the auction closes.</p>
+                            <h3>@L["How do I win an auction?"]</h3>
+                            <p>@L["You win if your bid is the highest valid bid when the auction closes."]</p>
                         </section>
                         <section>
-                            <h3>Why does the timer extend by 5 minutes?</h3>
-                            <p>If someone bids in the last 5 minutes, the auction is extended by 5 minutes so everyone has a fair chance.</p>
+                            <h3>@L["Why does the timer extend by 5 minutes?"]</h3>
+                            <p>@L["If someone bids in the last 5 minutes, the auction is extended by 5 minutes so everyone has a fair chance."]</p>
                         </section>
                         <section>
-                            <h3>When can I see the seller's email and phone number?</h3>
-                            <p>Seller contact details are visible only to the winner after the auction ends.</p>
+                            <h3>@L["When can I see the seller's email and phone number?"]</h3>
+                            <p>@L["Seller contact details are visible only to the winner after the auction ends."]</p>
                         </section>
                         <section>
-                            <h3>What happens after I win?</h3>
-                            <p>The checkout panel appears on the closed listing with the final price and seller contact details.</p>
+                            <h3>@L["What happens after I win?"]</h3>
+                            <p>@L["The checkout panel appears on the closed listing with the final price and seller contact details."]</p>
                         </section>
                         <section>
-                            <h3>How does Cash payment work?</h3>
-                            <p>Select Cash, then contact the seller to arrange payment and pickup using the details shown to you.</p>
+                            <h3>@L["How does Cash payment work?"]</h3>
+                            <p>@L["Select Cash, then contact the seller to arrange payment and pickup using the details shown to you."]</p>
                         </section>
                         <section>
-                            <h3>Why is Card payment marked as under development?</h3>
-                            <p>Card payment is not active yet, so completed auctions should use the available Cash option for now.</p>
+                            <h3>@L["Why is Card payment marked as under development?"]</h3>
+                            <p>@L["Card payment is not active yet, so completed auctions should use the available Cash option for now."]</p>
                         </section>
                     </div>
                 </div>
@@ -110,8 +149,8 @@
         <div class="container">
             <div class="footer-content">
                 <div>
-                    <strong>Auctions</strong>
-                    <span>Bid live on curated marketplace listings.</span>
+                    <strong>@L["Auctions"]</strong>
+                    <span>@L["Bid live on curated marketplace listings."]</span>
                 </div>
                 <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
             </div>

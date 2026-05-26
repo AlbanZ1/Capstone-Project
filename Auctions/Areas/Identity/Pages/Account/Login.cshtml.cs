@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Localization;
 
 namespace Auctions.Areas.Identity.Pages.Account;
 
@@ -10,11 +11,13 @@ public class LoginModel : PageModel
 {
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly ILogger<LoginModel> _logger;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
-    public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
+    public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger, IStringLocalizer<SharedResource> localizer)
     {
         _signInManager = signInManager;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [BindProperty]
@@ -85,7 +88,7 @@ public class LoginModel : PageModel
             return RedirectToPage("./Lockout");
         }
 
-        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        ModelState.AddModelError(string.Empty, _localizer["Invalid login attempt."]);
         ReturnUrl = returnUrl;
         return Page();
     }

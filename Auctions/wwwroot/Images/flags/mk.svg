@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" role="img" aria-label="North Macedonia flag">
+  <rect width="700" height="500" fill="#d20000"/>
+  <path fill="#ffe600" d="M350 250L0 0h145l205 250L145 500H0zm0 0L700 0H555L350 250l205 250h145z"/>
+  <path fill="#ffe600" d="M350 250L310 0h80zm0 0l40 250h-80zm0 0L0 212v76zm0 0l350-38v76z"/>
+  <circle cx="350" cy="250" r="70" fill="#d20000"/>
+  <circle cx="350" cy="250" r="52" fill="#ffe600"/>
+</svg>

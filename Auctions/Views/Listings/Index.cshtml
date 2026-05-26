@@ -1,9 +1,11 @@
 ﻿@model PaginatedList<Auctions.Models.Listing>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Auctions.SharedResource> L
 
 @{
     var listingAction = ViewData["CurrentListingAction"] as string ?? "Index";
     var isMyListings = listingAction == "MyListings" || ViewData["MineOnly"] as bool? == true;
-    ViewData["Title"] = isMyListings ? "My Listings" : "Active Listings";
+    ViewData["Title"] = isMyListings ? L["My Listings"] : L["Active Listings"];
     var categories = ViewData["Categories"] as SelectList;
 }
 
@@ -59,27 +61,27 @@
 
 <section class="listing-intro">
     <div>
-        <p class="section-kicker">@(isMyListings ? "Seller dashboard" : "Live marketplace")</p>
-        <h1>@(isMyListings ? "My Listings" : "Active Auctions")</h1>
-        <p>@(isMyListings ? "Review your lots and keep track of their auction status." : "Search current lots, compare bids, and follow auctions while they are open.")</p>
+        <p class="section-kicker">@(isMyListings ? L["Seller dashboard"] : L["Live marketplace"])</p>
+        <h1>@(isMyListings ? L["My Listings"] : L["Active Auctions"])</h1>
+        <p>@(isMyListings ? L["Review your lots and keep track of their auction status."] : L["Search current lots, compare bids, and follow auctions while they are open."])</p>
     </div>
     @if(User.Identity?.IsAuthenticated == true)
     {
         <a asp-action="Create" class="btn btn-accent">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            Create Listing
+            @L["Create Listing"]
         </a>
     }
 </section>
 
-<section class="category-strip" aria-label="Browse categories">
+<section class="category-strip" aria-label="@L["Browse Categories"]">
     <div class="category-strip-header">
-        <h2>Browse Categories</h2>
+        <h2>@L["Browse Categories"]</h2>
         <a asp-action="@listingAction"
            asp-route-searchString="@ViewData["CurrentFilter"]"
            asp-route-statusFilter="@ViewData["CurrentStatusFilter"]"
            asp-route-viewMode="@ViewData["CurrentViewMode"]"
-           asp-route-mineOnly="@ViewData["MineOnly"]">All listings</a>
+           asp-route-mineOnly="@ViewData["MineOnly"]">@L["All listings"]</a>
     </div>
     <div class="category-grid">
         @foreach(var category in categories ?? Enumerable.Empty<SelectListItem>())
@@ -113,29 +115,29 @@
     }
     <div class="row g-3 align-items-end">
         <div class="col-lg-6">
-            <label for="searchString" class="form-label">Search listings</label>
+            <label for="searchString" class="form-label">@L["Search listings"]</label>
             <div class="input-group">
                 <span class="input-group-text" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
-                <input type="text" id="searchString" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Search by title" />
+                <input type="text" id="searchString" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="@L["Search by title"]" />
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
-            <label for="categoryId" class="form-label">Category</label>
+            <label for="categoryId" class="form-label">@L["Category"]</label>
             <select id="categoryId" name="categoryId" class="form-select" asp-items="@(categories)">
-                <option value="">All categories</option>
+                <option value="">@L["All categories"]</option>
             </select>
         </div>
         <div class="col-md-6 col-lg-3 filter-actions">
-            <button type="submit" class="btn btn-primary">Filter</button>
+            <button type="submit" class="btn btn-primary">@L["Filter"]</button>
             <a asp-action="@listingAction"
                asp-route-viewMode="@ViewData["CurrentViewMode"]"
                asp-route-mineOnly="@ViewData["MineOnly"]"
-               class="btn btn-outline-secondary">Clear</a>
+               class="btn btn-outline-secondary">@L["Clear"]</a>
         </div>
     </div>
 </form>
 
-<section class="auction-grid" aria-label="Auction listings">
+<section class="auction-grid" aria-label="@L["Auction listings"]">
     @foreach(var listing in Model)
     {
         <article class="auction-card">
@@ -144,17 +146,17 @@
             </a>
             <div class="auction-card-body">
                 <div class="auction-meta-row">
-                    <span class="category-pill">@(listing.Category?.Name ?? "Uncategorized")</span>
-                    <span class="status-badge @GetStatusClass(listing.Status)">@listing.Status</span>
+                    <span class="category-pill">@(listing.Category?.Name ?? L["Uncategorized"])</span>
+                    <span class="status-badge @GetStatusClass(listing.Status)">@L[listing.Status.ToString()]</span>
                 </div>
                 <h2><a asp-action="Details" asp-route-id="@listing.Id">@listing.Title</a></h2>
                 <dl class="auction-stats">
                     <div>
-                        <dt>Current price</dt>
+                        <dt>@L["Current price"]</dt>
                         <dd>$@listing.CurrentPrice.ToString("N2")</dd>
                     </div>
                     <div>
-                        <dt>Time remaining</dt>
+                        <dt>@L["Time remaining"]</dt>
                         <dd class="countdown-label js-auction-countdown @(listing.Status == AuctionStatus.Closed ? "countdown-closed" : "")"
                             data-status="@listing.Status"
                             data-start-time="@listing.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")"
@@ -166,9 +168,9 @@
                 </dl>
                 @if(listing.Bids != null)
                 {
-                    <p class="bid-count"><i class="fa-solid fa-signal" aria-hidden="true"></i> @listing.Bids.Count bids</p>
+                    <p class="bid-count"><i class="fa-solid fa-signal" aria-hidden="true"></i> @listing.Bids.Count @L["bids"]</p>
                 }
-                <a asp-action="Details" asp-route-id="@listing.Id" class="btn btn-primary w-100">View Details</a>
+                <a asp-action="Details" asp-route-id="@listing.Id" class="btn btn-primary w-100">@L["View Details"]</a>
             </div>
         </article>
     }
@@ -177,8 +179,8 @@
 {
     <div class="empty-state">
         <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
-        <h2>No @(isMyListings ? "listings" : "active listings") found</h2>
-        <p>Try a broader search or clear the current category filter.</p>
+        <h2>@(isMyListings ? L["No listings found"] : L["No active listings found"])</h2>
+        <p>@L["Try a broader search or clear the current category filter."]</p>
     </div>
 }
 
@@ -196,10 +198,10 @@
         asp-route-viewMode="@ViewData["CurrentViewMode"]"
         asp-route-mineOnly="@ViewData["MineOnly"]"
         class="btn btn-outline-secondary @prevDisabled">
-        Previous
+        @L["Previous"]
     </a>
     <div class="page-status">
-        Page @Model.PageIndex of @Model.TotalPages
+        @string.Format(L["Page {0} of {1}"], Model.PageIndex, Model.TotalPages)
     </div>
     <a asp-action="@listingAction"
         asp-route-pageNumber="@(Model.PageIndex + 1)"
@@ -209,6 +211,6 @@
         asp-route-viewMode="@ViewData["CurrentViewMode"]"
         asp-route-mineOnly="@ViewData["MineOnly"]"
         class="btn btn-outline-secondary @nextDisabled">
-        Next
+        @L["Next"]
     </a>
 </nav>

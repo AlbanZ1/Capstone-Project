@@ -1,14 +1,16 @@
 ﻿@model Auctions.Models.ListingVM
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Localization
 @inject UserManager<IdentityUser> userManager
+@inject IStringLocalizer<Auctions.SharedResource> L
 @{
-    ViewData["Title"] = "Create Listing";
+    ViewData["Title"] = L["Create Listing"];
 }
 
 <section class="form-page-header">
-    <p class="section-kicker">New auction</p>
-    <h1>Create Listing</h1>
-    <p>Set the core lot details, choose its auction window, and add a clear image for bidders.</p>
+    <p class="section-kicker">@L["New auction"]</p>
+    <h1>@L["Create Listing"]</h1>
+    <p>@L["Set the core lot details, choose its auction window, and add a clear image for bidders."]</p>
 </section>
 
 <div class="create-layout">
@@ -16,20 +18,20 @@
         <form asp-action="Create" enctype="multipart/form-data" class="listing-form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-field">
-                <label asp-for="Title" class="form-label"></label>
+                <label asp-for="Title" class="form-label">@L["Title"]</label>
                 <input asp-for="Title" class="form-control" />
-                <small class="form-text">Use a title bidders can scan quickly.</small>
+                <small class="form-text">@L["Use a title bidders can scan quickly."]</small>
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-field">
-                <label asp-for="Description" class="form-label"></label>
+                <label asp-for="Description" class="form-label">@L["Description"]</label>
                 <textarea asp-for="Description" class="form-control" rows="5"></textarea>
-                <small class="form-text">Describe condition, included items, and details that affect bidding.</small>
+                <small class="form-text">@L["Describe condition, included items, and details that affect bidding."]</small>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="row g-3">
                 <div class="col-md-6 form-field">
-                    <label asp-for="StartingPrice" class="form-label"></label>
+                    <label asp-for="StartingPrice" class="form-label">@L["Starting price"]</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input asp-for="StartingPrice" class="form-control" min="0" step="0.01" />
@@ -37,38 +39,46 @@
                     <span asp-validation-for="StartingPrice" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 form-field">
-                    <label asp-for="CategoryId" class="form-label"></label>
-                    <select asp-for="CategoryId" class="form-select" asp-items="@(ViewData["Categories"] as SelectList)">
-                        <option value="">Select a category</option>
-                    </select>
-                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    <label asp-for="MinimumBidIncrement" class="form-label">@L["Minimum bid increment"]</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="MinimumBidIncrement" class="form-control" min="0.01" step="0.01" />
+                    </div>
+                    <span asp-validation-for="MinimumBidIncrement" class="text-danger"></span>
                 </div>
             </div>
             <div class="row g-3">
                 <div class="col-md-6 form-field">
-                    <label asp-for="StartTime" class="form-label"></label>
+                    <label asp-for="CategoryId" class="form-label">@L["Category"]</label>
+                    <select asp-for="CategoryId" class="form-select" asp-items="@(ViewData["Categories"] as SelectList)">
+                        <option value="">@L["Select a category"]</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-field">
+                    <label asp-for="StartTime" class="form-label">@L["Start Time"]</label>
                     <input asp-for="StartTime" class="form-control" type="datetime-local" />
                     <span asp-validation-for="StartTime" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 form-field">
-                    <label asp-for="EndTime" class="form-label"></label>
+                    <label asp-for="EndTime" class="form-label">@L["End Time"]</label>
                     <input asp-for="EndTime" class="form-control" type="datetime-local" />
                     <span asp-validation-for="EndTime" class="text-danger"></span>
                 </div>
             </div>
             <div class="form-field">
-                <label asp-for="ContactPhoneNumber" class="form-label"></label>
+                <label asp-for="ContactPhoneNumber" class="form-label">@L["Contact Phone Number"]</label>
                 <input asp-for="ContactPhoneNumber" class="form-control" autocomplete="tel" />
-                <small class="form-text">Visible only to you, and to the winner after the auction closes.</small>
+                <small class="form-text">@L["Visible only to you, and to the winner after the auction closes."]</small>
                 <span asp-validation-for="ContactPhoneNumber" class="text-danger"></span>
             </div>
             <div class="form-field image-upload">
-                <label asp-for="Image" class="form-label"></label>
+                <label asp-for="Image" class="form-label">@L["Image"]</label>
                 <div class="upload-control">
                     <i class="fa-regular fa-image" aria-hidden="true"></i>
                     <div>
                         <input asp-for="Image" class="form-control" accept="image/*" />
-                        <small class="form-text">Upload a clear listing image.</small>
+                        <small class="form-text">@L["Upload a clear listing image."]</small>
                     </div>
                 </div>
                 <span asp-validation-for="Image" class="text-danger"></span>
@@ -78,17 +88,17 @@
                 <input type="hidden" asp-for="IdentityUserId" class="form-control" value="@userManager.GetUserId(User)"/>
             </div>
             <div class="form-actions">
-                <input type="submit" value="Create Listing" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-outline-secondary">Back to Listings</a>
+                <input type="submit" value="@L["Create Listing"]" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-outline-secondary">@L["Back to Listings"]</a>
             </div>
         </form>
     </section>
     <aside class="create-note">
-        <h2>Listing checklist</h2>
+        <h2>@L["Listing checklist"]</h2>
         <ul>
-            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Accurate category</li>
-            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Clear auction timing</li>
-            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Photo that shows the lot</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @L["Accurate category"]</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @L["Clear auction timing"]</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @L["Photo that shows the lot"]</li>
         </ul>
     </aside>
 </div>

@@ -22,6 +22,7 @@ namespace Auctions.Hubs
 
     public sealed record AuctionBidUpdate(
         double NewCurrentPrice,
+        double MinimumNextBid,
         double BidAmount,
         string BidderDisplayName,
         int BidCount,
