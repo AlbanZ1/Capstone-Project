@@ -34,7 +34,8 @@ namespace Auctions.Models
         [Display(Name = "Contact Phone Number")]
         public string ContactPhoneNumber { get; set; } = string.Empty;
 
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
+        public List<IFormFile> Images { get; set; } = new();
         public bool IsSold { get; set; } = false;
 
         [Required]

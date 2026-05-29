@@ -14,6 +14,7 @@ namespace Auctions.Data
         public DbSet<Bid> Bids { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<ListingImage> ListingImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -22,6 +23,15 @@ namespace Auctions.Data
             builder.Entity<Bid>()
                 .Property(b => b.CreatedAt)
                 .HasDefaultValueSql("GETDATE()");
+
+            builder.Entity<ListingImage>()
+                .HasOne(li => li.Listing)
+                .WithMany(l => l.ListingImages)
+                .HasForeignKey(li => li.ListingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ListingImage>()
+                .HasIndex(li => li.ListingId);
 
             builder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Electronics" },

@@ -19,6 +19,8 @@ namespace Auctions.Controllers
     public class ListingsController : Controller
     {
         private const int ListingsPageSize = 9;
+        private const int MaxListingImages = 8;
+        private const long MaxListingImageBytes = 5 * 1024 * 1024;
 
         private readonly IListingsService _listingsService;
         private readonly IBidsService _bidsService;
@@ -147,7 +149,10 @@ namespace Auctions.Controllers
             listing.IdentityUserId = userId;
             ModelState.Remove(nameof(listing.IdentityUserId));
 
-            if (ModelState.IsValid && listing.Image != null)
+            var listingImages = GetSubmittedImages(listing);
+            ValidateSubmittedImages(listingImages);
+
+            if (ModelState.IsValid)
             {
                 if (listing.StartingPrice <= 0)
                 {
@@ -170,7 +175,7 @@ namespace Auctions.Controllers
                     return View(listing);
                 }
 
-                var imagePath = await _imageStorageService.UploadListingImageAsync(listing.Image);
+                var imageUrls = await _imageStorageService.UploadListingImagesAsync(listingImages);
                 var startingPrice = listing.StartingPrice;
                 var status = listing.StartTime <= DateTime.Now ? AuctionStatus.Active : AuctionStatus.Pending;
 
@@ -187,8 +192,14 @@ namespace Auctions.Controllers
                     Status = status,
                     IdentityUserId = userId,
                     ContactPhoneNumber = listing.ContactPhoneNumber,
-                    ImagePath = imagePath,
+                    ImagePath = imageUrls.First(),
                     CategoryId = listing.CategoryId,
+                    ListingImages = imageUrls.Select((imageUrl, index) => new ListingImage
+                    {
+                        ImageUrl = imageUrl,
+                        IsPrimary = index == 0,
+                        DisplayOrder = index
+                    }).ToList()
                 };
 
                 await _listingsService.Add(listObj);
@@ -197,6 +208,49 @@ namespace Auctions.Controllers
 
             await PopulateCategorySelectList(listing.CategoryId);
             return View(listing);
+        }
+
+        private static List<IFormFile> GetSubmittedImages(ListingVM listing)
+        {
+            var images = listing.Images?
+                .Where(image => image != null && image.Length > 0)
+                .ToList() ?? new List<IFormFile>();
+
+            if (!images.Any() && listing.Image != null && listing.Image.Length > 0)
+            {
+                images.Add(listing.Image);
+            }
+
+            return images;
+        }
+
+        private void ValidateSubmittedImages(IReadOnlyCollection<IFormFile> images)
+        {
+            if (!images.Any())
+            {
+                ModelState.AddModelError(nameof(ListingVM.Images), _localizer["At least one listing image is required."]);
+                return;
+            }
+
+            if (images.Count > MaxListingImages)
+            {
+                ModelState.AddModelError(nameof(ListingVM.Images), string.Format(_localizer["You can upload up to {0} images."], MaxListingImages));
+            }
+
+            foreach (var image in images)
+            {
+                if (string.IsNullOrWhiteSpace(image.ContentType) || !image.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(nameof(ListingVM.Images), _localizer["Only image files can be uploaded."]);
+                    break;
+                }
+
+                if (image.Length > MaxListingImageBytes)
+                {
+                    ModelState.AddModelError(nameof(ListingVM.Images), _localizer["Each image must be 5 MB or smaller."]);
+                    break;
+                }
+            }
         }
 
         private async Task PopulateCategorySelectList(int? selectedCategoryId = null)

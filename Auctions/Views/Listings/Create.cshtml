@@ -10,7 +10,7 @@
 <section class="form-page-header">
     <p class="section-kicker">@L["New auction"]</p>
     <h1>@L["Create Listing"]</h1>
-    <p>@L["Set the core lot details, choose its auction window, and add a clear image for bidders."]</p>
+    <p>@L["Set the core lot details, choose its auction window, and add clear images for bidders."]</p>
 </section>
 
 <div class="create-layout">
@@ -73,15 +73,15 @@
                 <span asp-validation-for="ContactPhoneNumber" class="text-danger"></span>
             </div>
             <div class="form-field image-upload">
-                <label asp-for="Image" class="form-label">@L["Image"]</label>
+                <label asp-for="Images" class="form-label">@L["Images"]</label>
                 <div class="upload-control">
                     <i class="fa-regular fa-image" aria-hidden="true"></i>
                     <div>
-                        <input asp-for="Image" class="form-control" accept="image/*" />
-                        <small class="form-text">@L["Upload a clear listing image."]</small>
+                        <input asp-for="Images" class="form-control" accept="image/*" multiple />
+                        <small class="form-text">@L["You can upload multiple images. The first image will be used as the cover image."]</small>
                     </div>
                 </div>
-                <span asp-validation-for="Image" class="text-danger"></span>
+                <span asp-validation-for="Images" class="text-danger"></span>
             </div>
             
             <div>
@@ -98,7 +98,7 @@
         <ul>
             <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @L["Accurate category"]</li>
             <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @L["Clear auction timing"]</li>
-            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @L["Photo that shows the lot"]</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @L["Photos that show the lot"]</li>
         </ul>
     </aside>
 </div>

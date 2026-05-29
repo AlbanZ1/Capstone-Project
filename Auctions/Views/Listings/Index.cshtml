@@ -57,6 +57,19 @@
             _ => "fa-box-open"
         };
     }
+
+    private static string GetCoverImage(Listing listing)
+    {
+        if (!string.IsNullOrWhiteSpace(listing.ImagePath))
+        {
+            return listing.ImagePath;
+        }
+
+        return listing.ListingImages?
+            .OrderByDescending(image => image.IsPrimary)
+            .ThenBy(image => image.DisplayOrder)
+            .FirstOrDefault()?.ImageUrl ?? string.Empty;
+    }
 }
 
 <section class="listing-intro">
@@ -140,9 +153,10 @@
 <section class="auction-grid" aria-label="@L["Auction listings"]">
     @foreach(var listing in Model)
     {
+        var coverImage = GetCoverImage(listing);
         <article class="auction-card">
             <a asp-action="Details" asp-route-id="@listing.Id" class="auction-image-link" aria-label="View @listing.Title details">
-                <img src="@listing.ImagePath" alt="@listing.Title" class="auction-image" />
+                <img src="@coverImage" alt="@listing.Title" class="auction-image" />
             </a>
             <div class="auction-card-body">
                 <div class="auction-meta-row">

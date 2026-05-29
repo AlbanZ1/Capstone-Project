@@ -34,5 +34,6 @@ namespace Auctions.Models
 
         public List<Bid>? Bids { get; set; }
         public List<Comment>? Comments { get; set; }
+        public List<ListingImage>? ListingImages { get; set; }
     }
 }

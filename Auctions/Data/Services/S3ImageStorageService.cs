@@ -63,5 +63,17 @@ namespace Auctions.Data.Services
 
             return $"https://{bucketName}.s3.{region}.amazonaws.com/{Uri.EscapeDataString(objectKey).Replace("%2F", "/")}";
         }
+
+        public async Task<IReadOnlyList<string>> UploadListingImagesAsync(IEnumerable<IFormFile> images)
+        {
+            var uploadedUrls = new List<string>();
+
+            foreach (var image in images)
+            {
+                uploadedUrls.Add(await UploadListingImageAsync(image));
+            }
+
+            return uploadedUrls;
+        }
     }
 }
