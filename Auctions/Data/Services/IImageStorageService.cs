@@ -5,5 +5,6 @@ namespace Auctions.Data.Services
     public interface IImageStorageService
     {
         Task<string> UploadListingImageAsync(IFormFile image);
+        Task<IReadOnlyList<string>> UploadListingImagesAsync(IEnumerable<IFormFile> images);
     }
 }

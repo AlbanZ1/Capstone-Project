@@ -22,7 +22,8 @@ namespace Auctions.Data.Services
         {
             var applicationDbContext = _context.Listings
                 .Include(l => l.User)
-                .Include(l => l.Category);
+                .Include(l => l.Category)
+                .Include(l => l.ListingImages);
             return applicationDbContext;
         }
 
@@ -32,6 +33,7 @@ namespace Auctions.Data.Services
                 .Include(l => l.User)
                 .Include(l => l.Winner)
                 .Include(l => l.Category)
+                .Include(l => l.ListingImages)
                 .Include(l => l.Comments)
                 .ThenInclude(l => l.User)
                 .Include(l => l.Bids)

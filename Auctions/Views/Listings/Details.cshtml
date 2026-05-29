@@ -22,6 +22,17 @@
     var winnerDisplayText = isSeller && Model.WinnerUserId != null
         ? (Model.Winner?.Email ?? "Winner selected")
         : (Model.WinnerUserId == null ? "No winner" : "Winner selected");
+    var listingImages = (Model.ListingImages ?? new List<ListingImage>())
+        .OrderByDescending(image => image.IsPrimary)
+        .ThenBy(image => image.DisplayOrder)
+        .Select(image => image.ImageUrl)
+        .Where(imageUrl => !string.IsNullOrWhiteSpace(imageUrl))
+        .ToList();
+
+    if (!listingImages.Any() && !string.IsNullOrWhiteSpace(Model.ImagePath))
+    {
+        listingImages.Add(Model.ImagePath);
+    }
 }
 
 @functions {
@@ -98,7 +109,42 @@
 <section class="detail-layout">
     <div class="detail-main">
         <div class="detail-media">
-            <img src="@Model.ImagePath" alt="@Model.Title" />
+            @if(listingImages.Count <= 1)
+            {
+                <img src="@(listingImages.FirstOrDefault() ?? Model.ImagePath)" alt="@Model.Title" />
+            }
+            else
+            {
+                <div id="listingImageCarousel" class="carousel slide listing-gallery" data-bs-ride="false">
+                    <div class="carousel-inner">
+                        @for(var i = 0; i < listingImages.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <img src="@listingImages[i]" alt="@($"{Model.Title} image {i + 1}")" />
+                            </div>
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#listingImageCarousel" data-bs-slide="prev" aria-label="@L["Previous image"]">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#listingImageCarousel" data-bs-slide="next" aria-label="@L["Next image"]">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    </button>
+                    <div class="listing-gallery-thumbs" aria-label="@L["Listing image thumbnails"]">
+                        @for(var i = 0; i < listingImages.Count; i++)
+                        {
+                            <button type="button"
+                                    data-bs-target="#listingImageCarousel"
+                                    data-bs-slide-to="@i"
+                                    class="@(i == 0 ? "active" : "")"
+                                    aria-current="@(i == 0 ? "true" : "false")"
+                                    aria-label="@($"{L["Show image"]} {i + 1}")">
+                                <img src="@listingImages[i]" alt="" />
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
         </div>
         <article class="surface-panel detail-description">
             <h2>@L["Description"]</h2>

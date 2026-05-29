@@ -805,6 +805,53 @@ textarea.form-control {
   width: 100%;
 }
 
+.listing-gallery .carousel-item {
+  background: #dfe7f1;
+}
+
+.listing-gallery .carousel-item img {
+  aspect-ratio: 4 / 3;
+  height: auto;
+  max-height: min(70vh, 42rem);
+  object-fit: contain;
+  width: 100%;
+}
+
+.listing-gallery .carousel-control-prev,
+.listing-gallery .carousel-control-next {
+  bottom: 5.5rem;
+}
+
+.listing-gallery-thumbs {
+  background: #f7f9fc;
+  border-top: 1px solid var(--market-line);
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 0.75rem;
+}
+
+.listing-gallery-thumbs button {
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  flex: 0 0 4.75rem;
+  height: 3.75rem;
+  overflow: hidden;
+  padding: 0;
+}
+
+.listing-gallery-thumbs button.active {
+  border-color: var(--market-blue);
+}
+
+.listing-gallery-thumbs img {
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  width: 100%;
+}
+
 .detail-description,
 .price-panel,
 .bid-history,
