@@ -23,6 +23,8 @@ namespace Auctions.Models
         public bool IsSold { get; set; } = false;
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
+        [Timestamp]
+        public byte[]? RowVersion { get; set; }
 
         [Required]
         public string? IdentityUserId { get; set; }

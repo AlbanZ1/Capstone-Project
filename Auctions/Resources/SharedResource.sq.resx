@@ -148,4 +148,5 @@
   <data name="End Time" xml:space="preserve"><value>Koha e përfundimit</value></data>
   <data name="Contact Phone Number" xml:space="preserve"><value>Numri i telefonit për kontakt</value></data>
   <data name="Image" xml:space="preserve"><value>Foto</value></data>
+  <data name="Another bidder placed a bid before you. Please refresh and try again." xml:space="preserve"><value>Një ofertues tjetër vendosi një ofertë para jush. Ju lutemi rifreskoni faqen dhe provoni përsëri.</value></data>
 </root>

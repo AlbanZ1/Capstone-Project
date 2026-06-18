@@ -30,7 +30,6 @@ namespace Auctions.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<AuctionHub> _auctionHubContext;
         private readonly IStringLocalizer<SharedResource> _localizer;
-        private static readonly TimeSpan AntiSnipingWindow = TimeSpan.FromMinutes(5);
 
         public ListingsController(IListingsService listingsService, IBidsService bidsService, ICommentsService commentsService, IImageStorageService imageStorageService, IEmailService emailService, ApplicationDbContext context, IHubContext<AuctionHub> auctionHubContext, IStringLocalizer<SharedResource> localizer)
         {
@@ -297,14 +296,6 @@ namespace Auctions.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddBid(int listingId, double price)
         {
-            var listing = await _listingsService.GetById(listingId);
-            if (listing == null)
-            {
-                return NotFound();
-            }
-
-            await RefreshAuctionStatusAsync(listing);
-
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var now = DateTime.Now;
 
@@ -313,86 +304,41 @@ namespace Auctions.Controllers
                 return Challenge();
             }
 
-            if (listing.IdentityUserId == userId)
+            var result = await _bidsService.PlaceBidAsync(listingId, price, userId, now);
+            if (result.Listing == null)
             {
-                ModelState.AddModelError(nameof(price), _localizer["You cannot bid on your own listing."]);
+                return NotFound();
             }
 
-            if (listing.Status == AuctionStatus.Closed || listing.IsSold)
+            var listing = result.Listing;
+            if (!result.Succeeded || result.Bid == null)
             {
-                ModelState.AddModelError(nameof(price), _localizer["This auction is closed and no longer accepts bids."]);
-            }
-
-            if (now < listing.StartTime)
-            {
-                ModelState.AddModelError(nameof(price), string.Format(_localizer["Bidding starts on {0}."], listing.StartTime.ToString("g")));
-            }
-
-            if (now > listing.EndTime)
-            {
-                ModelState.AddModelError(nameof(price), _localizer["This auction has ended and no longer accepts bids."]);
-            }
-
-            var minimumNextBid = listing.CurrentPrice + listing.MinimumBidIncrement;
-            if (price < minimumNextBid)
-            {
-                ModelState.AddModelError(nameof(price), string.Format(_localizer["Your bid must be at least {0}."], $"${minimumNextBid:N2}"));
-            }
-
-            if (!ModelState.IsValid)
-            {
+                var errorMessage = result.ErrorMessage ?? "Unable to place bid.";
+                ModelState.AddModelError(
+                    nameof(price),
+                    result.ErrorArguments.Length > 0
+                        ? string.Format(_localizer[errorMessage], result.ErrorArguments)
+                        : _localizer[errorMessage]);
                 return View("Details", listing);
             }
 
-            var previousHighestBid = listing.Bids?
-                .OrderByDescending(b => b.Price)
-                .ThenBy(b => b.CreatedAt)
-                .FirstOrDefault();
-            var previousHighestBidder = previousHighestBid?.User;
-            var oldHighestBid = listing.CurrentPrice;
-
-            var bid = new Bid
-            {
-                Price = price,
-                ListingId = listing.Id,
-                IdentityUserId = userId,
-                CreatedAt = now
-            };
-
-            var auctionExtended = false;
-            DateTime? updatedEndTime = null;
-            if (listing.Status == AuctionStatus.Active
-                && !listing.IsSold
-                && now >= listing.StartTime
-                && now < listing.EndTime
-                && listing.EndTime - now <= AntiSnipingWindow)
-            {
-                listing.EndTime = now.Add(AntiSnipingWindow);
-                auctionExtended = true;
-                updatedEndTime = listing.EndTime;
-                ViewData["AuctionExtended"] = true;
-            }
-
-            listing.Price = price;
-            listing.CurrentPrice = price;
-
-            await _bidsService.Add(bid);
+            ViewData["AuctionExtended"] = result.AuctionExtended;
 
             var bidUpdate = new AuctionBidUpdate(
                 listing.CurrentPrice,
                 listing.CurrentPrice + listing.MinimumBidIncrement,
-                bid.Price,
+                result.Bid.Price,
                 User.Identity?.Name ?? "Auction user",
-                await _context.Bids.CountAsync(b => b.ListingId == listing.Id),
-                bid.CreatedAt,
-                updatedEndTime,
-                auctionExtended);
+                result.BidCount,
+                result.Bid.CreatedAt,
+                result.UpdatedEndTime,
+                result.AuctionExtended);
 
             await _auctionHubContext.Clients
                 .Group(AuctionHub.ListingGroupName(listing.Id))
                 .SendAsync("BidPlaced", bidUpdate);
 
-            if (previousHighestBidder != null && previousHighestBidder.Id != userId)
+            if (result.PreviousHighestBidder != null && result.PreviousHighestBidder.Id != userId)
             {
                 var listingUrl = Url.Action(nameof(Details), "Listings", new { id = listing.Id }, Request.Scheme)
                     ?? $"/Listings/Details/{listing.Id}";
@@ -403,8 +349,8 @@ namespace Auctions.Controllers
 
                     Listing: {listing.Title}
                     Category: {categoryText}
-                    Previous highest bid: ${oldHighestBid:N2}
-                    New highest bid: ${bid.Price:N2}
+                    Previous highest bid: ${result.PreviousHighestBid:N2}
+                    New highest bid: ${result.Bid.Price:N2}
                     New bidder: {bidderDisplayName}
 
                     View the listing:
@@ -412,7 +358,7 @@ namespace Auctions.Controllers
                     """;
 
                 await _emailService.SendEmailAsync(
-                    previousHighestBidder.Email ?? string.Empty,
+                    result.PreviousHighestBidder.Email ?? string.Empty,
                     $"You have been outbid on {listing.Title}",
                     body);
             }

@@ -148,4 +148,5 @@
   <data name="End Time" xml:space="preserve"><value>Време на завршување</value></data>
   <data name="Contact Phone Number" xml:space="preserve"><value>Контакт телефон</value></data>
   <data name="Image" xml:space="preserve"><value>Слика</value></data>
+  <data name="Another bidder placed a bid before you. Please refresh and try again." xml:space="preserve"><value>Друг понудувач постави понуда пред вас. Освежете ја страницата и обидете се повторно.</value></data>
 </root>

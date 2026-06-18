@@ -126,19 +126,17 @@
     {
         <input type="hidden" name="mineOnly" value="true" />
     }
+    @if(ViewData["CurrentCategoryId"] != null)
+    {
+        <input type="hidden" name="categoryId" value="@ViewData["CurrentCategoryId"]" />
+    }
     <div class="row g-3 align-items-end">
-        <div class="col-lg-6">
+        <div class="col-lg-9">
             <label for="searchString" class="form-label">@L["Search listings"]</label>
             <div class="input-group">
                 <span class="input-group-text" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
                 <input type="text" id="searchString" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="@L["Search by title"]" />
             </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <label for="categoryId" class="form-label">@L["Category"]</label>
-            <select id="categoryId" name="categoryId" class="form-select" asp-items="@(categories)">
-                <option value="">@L["All categories"]</option>
-            </select>
         </div>
         <div class="col-md-6 col-lg-3 filter-actions">
             <button type="submit" class="btn btn-primary">@L["Filter"]</button>

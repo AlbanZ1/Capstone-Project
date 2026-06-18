@@ -24,6 +24,10 @@ namespace Auctions.Data
                 .Property(b => b.CreatedAt)
                 .HasDefaultValueSql("GETDATE()");
 
+            builder.Entity<Listing>()
+                .Property(l => l.RowVersion)
+                .IsRowVersion();
+
             builder.Entity<ListingImage>()
                 .HasOne(li => li.Listing)
                 .WithMany(l => l.ListingImages)

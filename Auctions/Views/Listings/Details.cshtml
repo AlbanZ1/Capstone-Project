@@ -14,6 +14,7 @@
     var isWinner = isAuthenticated && currentUserId == Model.WinnerUserId;
     var isClosed = Model.Status == AuctionStatus.Closed;
     var canViewSellerContact = isSeller || (isClosed && isWinner);
+    var showSellerContactCard = !(isClosed && isWinner);
     var sellerEmail = Model.User?.Email ?? "Not available";
     var sellerPhone = string.IsNullOrWhiteSpace(Model.ContactPhoneNumber) ? "Not available" : Model.ContactPhoneNumber;
     var finalPrice = Model.CurrentPrice;
@@ -250,26 +251,29 @@
             }
         </section>
 
-        <section class="surface-panel seller-contact-panel">
-            <h2>@L["Seller Contact"]</h2>
-            @if(canViewSellerContact)
-            {
-                <dl class="detail-facts">
-                    <div>
-                        <dt>@L["Email"]</dt>
-                        <dd>@sellerEmail</dd>
-                    </div>
-                    <div>
-                        <dt>@L["Phone"]</dt>
-                        <dd>@sellerPhone</dd>
-                    </div>
-                </dl>
-            }
-            else
-            {
-                <p>@L["Seller contact details are visible only to the winner after the auction ends."]</p>
-            }
-        </section>
+        @if(showSellerContactCard)
+        {
+            <section class="surface-panel seller-contact-panel">
+                <h2>@L["Seller Contact"]</h2>
+                @if(canViewSellerContact)
+                {
+                    <dl class="detail-facts">
+                        <div>
+                            <dt>@L["Email"]</dt>
+                            <dd>@sellerEmail</dd>
+                        </div>
+                        <div>
+                            <dt>@L["Phone"]</dt>
+                            <dd>@sellerPhone</dd>
+                        </div>
+                    </dl>
+                }
+                else
+                {
+                    <p>@L["Seller contact details are visible only to the winner after the auction ends."]</p>
+                }
+            </section>
+        }
 
         @if(isSeller && isClosed)
         {
